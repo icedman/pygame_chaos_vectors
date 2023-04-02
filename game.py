@@ -15,8 +15,12 @@ class Game:
         gameState.player = entityService.create(0, 0, EntityType.player)
         entityService.attach(gameState.player)
 
-        entityService.attach(entityService.create(100, 100, EntityType.pinkPinwheel))
-        entityService.attach(entityService.create(100, 100, EntityType.greenSquare))
+        # entityService.attach(entityService.create(100, 100, EntityType.pinkPinwheel))
+        # entityService.attach(entityService.create(100, 100, EntityType.greenSquare))
+        # entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
+        # entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
+        # entityService.attach(entityService.create(100, 100, EntityType.snake))
+        entityService.attach(entityService.create(100, 100, EntityType.redClone))
 
         self.centerPlayer()
 

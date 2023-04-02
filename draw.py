@@ -37,9 +37,9 @@ class Context:
         m.scale(x, y, 1)
         self.state.matrix.multiply(m)
 
-    def rotate(self, z):
+    def rotate(self, az):
         m = Matrix.identity()
-        m.rotate(0, 0, z)
+        m.rotate(0, 0, az * 3.14 / 180)
         self.state.matrix.multiply(m)
 
     @property
@@ -75,6 +75,15 @@ class Context:
         for i in range(1, sides + 1):
             p1 = points[i - 1]
             p2 = points[i]
+            self.drawLine(p1[0], p1[1], p2[0], p2[1], color)
+
+    def drawPolygonPoints(self, points, color):
+        for i in range(1, len(points)+1):
+            p1 = points[i - 1]
+            k = i
+            if (k == len(points)):
+                k =0
+            p2 = points[k]
             self.drawLine(p1[0], p1[1], p2[0], p2[1], color)
 
     def drawChar(self, x, y, c, size, color, extentsOnly=False):

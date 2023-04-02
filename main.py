@@ -3,6 +3,7 @@ from maths import *
 from game import Game
 from state import gameState
 from draw import Context
+from renderer import Renderer, renderShape
 
 pygame.init()
 size = [800, 600]
@@ -19,7 +20,7 @@ rot = 0
 while not done:
     tick = pygame.time.get_ticks()
     dt = tick - last_tick
-    if dt < 48:
+    if dt < 24:
         continue
     last_tick = tick
 
@@ -45,7 +46,7 @@ while not done:
     gfx.save()
     
     gfx.save()
-    gfx.rotate(rot * 3.14 / 180)
+    gfx.rotate(rot)
     gfx.scale(2, 2)
     gfx.translate(400, 200)
     gfx.drawPolygon(0, 0, 120, 5, 'red')
@@ -57,15 +58,9 @@ while not done:
     for k in entities.keys():
         ek = entities[k]
         for e in ek:
-            gfx.drawLine(
-                e.pos.x - e.radius / 2,
-                e.pos.y - e.radius / 2,
-                e.pos.x + e.radius / 2,
-                e.pos.y + e.radius / 2,
-                e.color,
-            )
-            if e.text != '':
-                gfx.drawText(e.pos.x, e.pos.y, e.text, 2, e.color)
+            Renderer.renderEntity(gfx, e)
+
+    renderShape(gfx, 'square_diamond', 200, 200, 40)
 
     gfx.restore()
     pygame.display.flip()

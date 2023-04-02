@@ -11,6 +11,10 @@ def Rnd(s, e):
     return s + r
 
 
+def RndOr(a, b):
+    return a if Rand(0, 10) > 5 else b
+
+
 def Cos(a):
     return math.cos(a)
 
@@ -31,6 +35,12 @@ def distance(x, y, x2, y2):
     dx = x - x2
     dy = y - y2
     return math.sqrt((dx * dx) + (dy * dy))
+
+
+def angleTo(x, y, x2, y2):
+    angleRadians = math.atan2(y2 - y, x2 - x)
+    angle = angleRadians * 180 / 3.14
+    return angle
 
 
 def Sgn(a):
@@ -160,9 +170,9 @@ class Matrix:
                 self.M = mrot.M
                 return
 
-        if (rotSeq & ROTSEQX):
-            if (rotSeq & ROTSEQY):
-                if (rotSeq & ROTSEQZ):
+        if rotSeq & ROTSEQX:
+            if rotSeq & ROTSEQY:
+                if rotSeq & ROTSEQZ:
                     mtmp = Matrix.copy(mx).multiply(my)
                     mrot = Matrix.copy(mtmp).multiply(mz)
                     self.M = mrot.M
@@ -171,8 +181,8 @@ class Matrix:
                 self.M = mrot.M
                 return
 
-        if (rotSeq & ROTSEQZ):
-            if (rotSeq & ROTSEQX):
+        if rotSeq & ROTSEQZ:
+            if rotSeq & ROTSEQX:
                 mrot = Matrix.copy(mx).multiply(my)
                 self.M = mrot.M
                 return
@@ -236,3 +246,23 @@ class Vector:
             sum += m.M[3][col]
             r.M[col] = sum
         return r
+
+    # def add():
+    # def multiply():
+
+    def scale(self, s):
+        self.x *= s
+        self.y *= s
+        self.z *= s
+
+    def normalize(self):
+        l = self.length()
+        self.x = self.x / l
+        self.y = self.y / l
+        self.z = self.z / l
+
+    def length(self):
+        fx = self.x
+        fy = self.y
+        fz = self.z
+        return Sqr(fx * fx + fy * fy + fz * fz)
