@@ -1,6 +1,9 @@
 class GameState:
+    spawn_count = [0, 0, 0, 0]
+    starting_difficulty = 0
+
     speed_scale = 1
-    speed_player = 2
+    speed_player = 4
 
     tick = 0
     cnt = 0
@@ -17,26 +20,28 @@ class GameState:
     }
 
     speed_nme = 0.75
-    speed_shot = 4
+    speed_shot = 8
     speed_particle = 3
-    fire_rate = 200
+    fire_rate = 100
     last_gt = 0
+    spawn_gt = 0
 
     player = None
 
     def init(self):
-        speed_scale = 0.2
-        speed_player = 10
-        tick = 0
-        cnt = 0
-        keys = {}
-        speed_nme = 0.75
-        speed_shot = 4
-        speed_particle = 3
-        fire_rate = 200
-        last_gt = 0
-        player = None
-        return
+        self.speed_scale = 1
+        self.speed_player = 4
+        self.tick = 0
+        self.cnt = 0
+        self.keys = {}
+        self.speed_nme = 0.75
+        self.speed_shot = 8
+        self.speed_particle = 3
+        self.fire_rate = 100
+        self.last_gt = 0
+        self.spawn_gt = 0
+        self.player = None
+        self.spawn_count = [0, 0, 0, 0]
 
 
 gameState = GameState()

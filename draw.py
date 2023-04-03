@@ -78,11 +78,11 @@ class Context:
             self.drawLine(p1[0], p1[1], p2[0], p2[1], color)
 
     def drawPolygonPoints(self, points, color):
-        for i in range(1, len(points)+1):
+        for i in range(1, len(points) + 1):
             p1 = points[i - 1]
             k = i
-            if (k == len(points)):
-                k =0
+            if k == len(points):
+                k = 0
             p2 = points[k]
             self.drawLine(p1[0], p1[1], p2[0], p2[1], color)
 

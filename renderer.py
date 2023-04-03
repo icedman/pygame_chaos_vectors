@@ -5,32 +5,44 @@ from draw import Context
 from entities import *
 from shapes import shapes
 
-def renderShape(ctx: Context, shape: str, x, y, r, color = 'red'):
-    sl = shapes[shape]['shapes']
+
+def renderShape(ctx: Context, shape: str, x, y, r, color="red"):
+    sl = shapes[shape]["shapes"]
     ctx.save()
     ctx.scale(r, r)
     ctx.translate(x, y)
     for s in sl:
         points = []
-        for p in s['points']:
+        for p in s["points"]:
             points.append(p)
         ctx.translate(points[0][0] * r, points[0][1] * r)
         del points[0]
         ctx.drawPolygonPoints(points, color)
     ctx.restore()
 
+
 def renderEntityShape(ctx: Context, e: Entity):
     return
 
+
 def renderDefault(ctx: Context, e: Entity):
-    ctx.save()
-    ctx.rotate(e.angle)
-    ctx.translate(e.pos.x, e.pos.y)
-    ctx.drawPolygon(0, 0, e.radius, 4, e.color)
-    ctx.restore()
-    if e.text != '':
+    if e.radius > 0:
+        ctx.save()
+        ctx.rotate(e.angle)
+        ctx.translate(e.pos.x, e.pos.y)
+        ctx.drawPolygon(0, 0, e.radius, 4, e.color)
+        ctx.restore()
+    if e.text != "":
         ctx.drawText(e.pos.x, e.pos.y, e.text, 2, e.color)
-    return
+
+
+def renderLineEnd(ctx: Context, e: Entity):
+    renderDefault(ctx, e)
+    if e.headNode != None:
+        return
+    if e.nextNode != None:
+        ctx.drawLine(e.pos.x, e.pos.y, e.nextNode.pos.x, e.nextNode.pos.y, "yellow")
+
 
 def renderShot(ctx: Context, e: Entity):
     d = Vector.copy(e.direction)
@@ -45,6 +57,7 @@ def renderShot(ctx: Context, e: Entity):
     )
     return
 
+
 def renderParticle(ctx: Context, e: Entity):
     d = Vector.copy(e.direction)
     d.normalize()
@@ -58,8 +71,8 @@ def renderParticle(ctx: Context, e: Entity):
     )
     return
 
-class Renderer:
 
+class Renderer:
     defs: dict[EntityType, any] = {
         EntityType.pinkPinwheel: renderDefault,
         EntityType.blueDiamond: renderDefault,
@@ -67,7 +80,7 @@ class Renderer:
         EntityType.purpleSquare: renderDefault,
         EntityType.blueCircle: renderDefault,
         EntityType.redCircle: renderDefault,
-        EntityType.lineEnd: renderDefault,
+        EntityType.lineEnd: renderLineEnd,
         EntityType.snake: renderDefault,
         EntityType.redClone: renderDefault,
         EntityType.butterfly: renderDefault,
@@ -77,6 +90,7 @@ class Renderer:
         EntityType.shot: renderShot,
         EntityType.enemyShot: renderShot,
         EntityType.particle: renderParticle,
+        EntityType.floatingText: renderDefault,
     }
 
     @staticmethod
@@ -84,6 +98,5 @@ class Renderer:
         r = Renderer.defs[e.type]
         r(ctx, e)
 
-        if e.text != '':
+        if e.text != "":
             ctx.drawText(e.pos.x, e.pos.y, e.text, 2, e.color)
-

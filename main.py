@@ -6,7 +6,7 @@ from draw import Context
 from renderer import Renderer, renderShape
 
 pygame.init()
-size = [800, 600]
+size = [1280, 800]
 screen = pygame.display.set_mode(size)
 done = False
 gfx = Context(screen)
@@ -44,23 +44,21 @@ while not done:
     gfx.clear("black")
 
     gfx.save()
-    
-    gfx.save()
-    gfx.rotate(rot)
-    gfx.scale(2, 2)
-    gfx.translate(400, 200)
-    gfx.drawPolygon(0, 0, 120, 5, 'red')
-    gfx.restore()
 
-    rot = (rot + 1) % 360
+    # gfx.save()
+    # gfx.rotate(rot)
+    # rot = (rot + 1) % 360
+    # gfx.scale(2, 2)
+    # gfx.translate(400, 200)
+    # gfx.drawPolygon(0, 0, 120, 5, 'red')
+    # gfx.restore()
+    # renderShape(gfx, 'square_diamond', 200, 200, 40)
 
     entities = game.entities()
     for k in entities.keys():
         ek = entities[k]
         for e in ek:
             Renderer.renderEntity(gfx, e)
-
-    renderShape(gfx, 'square_diamond', 200, 200, 40)
 
     gfx.restore()
     pygame.display.flip()

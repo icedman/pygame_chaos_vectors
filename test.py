@@ -7,4 +7,3 @@ game = Game()
 game.setup(size)
 
 game.update(0)
-

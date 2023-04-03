@@ -3,6 +3,10 @@ import math
 
 
 def Rand(s, e):
+    s = Floor(s)
+    e = Floor(e)
+    if e < s:
+        return s
     return random.randint(s, e)
 
 
@@ -25,6 +29,10 @@ def Sin(a):
 
 def Sqr(a):
     return math.sqrt(a)
+
+
+def Min(a, b):
+    return a if a < b else b
 
 
 def Abs(a):
@@ -247,8 +255,15 @@ class Vector:
             r.M[col] = sum
         return r
 
-    # def add():
-    # def multiply():
+    def add(self, v):
+        self.x += v.x
+        self.y += v.y
+        self.z += v.z
+
+    def subtract(self, v):
+        self.x -= v.x
+        self.y -= v.y
+        self.z -= v.z
 
     def scale(self, s):
         self.x *= s
@@ -257,6 +272,12 @@ class Vector:
 
     def normalize(self):
         l = self.length()
+        if (l) == 0:
+            self.x = 0
+            self.y = 0
+            self.z = 0
+            return
+
         self.x = self.x / l
         self.y = self.y / l
         self.z = self.z / l
