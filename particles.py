@@ -1,7 +1,28 @@
+from entities import entityService, Entity, EntityType
+from state import gameState
 from maths import *
 
 
-def initParticle(p, type=0, sz=1):
+class Particle(Entity):
+    def init(self):
+        Entity.init(self)
+        self.radius = 2
+        self.life = 1000
+        self.speed = gameState.speed_particle
+        self.max_count = 120
+        self.direction = Vector.identity()
+
+    def create(self):
+        return Particle()
+
+    def repel(self):
+        return
+
+    def kill(self):
+        return
+
+
+def initParticle(p, type=0, rot=0, sz=1):
     dir = 0
     mag = 0
 
@@ -62,3 +83,22 @@ def initParticle(p, type=0, sz=1):
     p.direction.y = p.direction.y * 2
     p.pos.x += p.direction.x * sz
     p.pos.y += p.direction.y * sz
+
+
+def createParticles(x, y, count, color, type=0, rot=0, sz=1):
+    res = []
+    for i in range(0, count):
+        p = entityService.create(x, y, EntityType.particle)
+        p.color = color
+        initParticle(p, type, rot, sz)
+        entityService.attach(p)
+        res.append(p)
+    return res
+
+
+def createFloatingText(x, y, text, color):
+    p = entityService.create(x, y, EntityType.floatingText)
+    p.text = text
+    p.color = color
+    p.direction = Vector(0, -1)
+    entityService.attach(p)

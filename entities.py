@@ -1,7 +1,6 @@
 from state import gameState
 from maths import *
 from enum import Enum
-from particles import initParticle
 from grid import grid
 
 
@@ -84,8 +83,11 @@ class Entity:
 
     def kill(self):
         e = self
-        createFloatingText(e.pos.x, e.pos.y, "+{}".format(e.points), e.color)
-        createParticles(e.pos.x, e.pos.y, 8, e.color)
+        if e.points > 0:
+            entityService.createFloatingText(
+                e.pos.x, e.pos.y, "+{}".format(e.points), e.color
+            )
+        entityService.createParticles(e.pos.x, e.pos.y, 8, e.color)
         entityService.destroy(e)
         grid.pull(e.pos.x, e.pos.y, 8, 8)
         # grid.push(e.pos.x, e.pos.y, 8, 1)
@@ -180,21 +182,24 @@ class Entity:
 
         e.direction = Vector(dx, dy)
 
-
-def createParticles(x, y, count, color, type=0, sz=1):
-    for i in range(0, count):
-        p = entityService.create(x, y, EntityType.particle)
-        p.color = color
-        initParticle(p, type, sz)
-        entityService.attach(p)
-
-
-def createFloatingText(x, y, text, color):
-    p = entityService.create(x, y, EntityType.floatingText)
-    p.text = text
-    p.color = color
-    p.direction = Vector(0, -1)
-    entityService.attach(p)
+    def blackHole(self):
+        blackhole_list = entityService.entities[EntityType.redCircle]
+        for blackhole in blackhole_list:
+            if blackhole.size > 0:
+                ddx = blackhole.pos.x - self.pos.x
+                ddy = blackhole.pos.y - self.pos.y
+                dist = Sqr(ddx * ddx + ddy * ddy) + 0.001
+                dx = self.direction.x
+                dy = self.direction.y
+                if dist < 75 + blackhole.size * 8:
+                    dx = dx + ddx / dist / 512 * (1200 - dist)
+                    dy = dy + ddy / dist / 512 * (1200 - dist)
+                    self.direction = Vector(dx, dy)
+                    if dist < 12 + blackhole.size / 2:
+                        self.points = 0
+                        self.kill()
+                        blackhole.grow(1)
+                        break
 
 
 class GreenSquare(Entity):
@@ -273,19 +278,6 @@ class BlueCircle(Entity):
 
     def create(self):
         return BlueCircle()
-
-
-class RedCircle(Entity):
-    def init(self):
-        Entity.init(self)
-        self.radius = 16
-        self.color = "red"
-        self.speed = 2.5
-        self.direction = Vector(0, 0)
-        self.max_count = 4
-
-    def create(self):
-        return RedCircle()
 
 
 class RedClone(Entity):
@@ -415,7 +407,7 @@ class SnakeBody(Entity):
                 e.nextNode.headNode = None
                 e.nextNode.freeze = 25
             entityService.destroy(e)
-            createParticles(e.pos.x, e.pos.y, 2, e.color)
+            entityService.createParticles(e.pos.x, e.pos.y, 2, e.color)
             return
 
         dist = distance(h.pos.x, h.pos.y, e.pos.x, e.pos.y)
@@ -446,7 +438,7 @@ class SnakeBody(Entity):
         return
 
     def kill(self):
-        createParticles(self.pos.x, self.pos.y, 3, self.color)
+        entityService.createParticles(self.pos.x, self.pos.y, 3, self.color)
 
 
 class LineEnd(Entity):
@@ -561,10 +553,13 @@ class Shot(Entity):
             or (y < 12)
             or (y > gameState.screen["height"] - 12)
         ):
-            createParticles(x, y, Rand(1, 3), e.color)
+            entityService.createParticles(x, y, Rand(1, 3), e.color)
             entityService.destroy(e)
 
     def repel(self):
+        return
+
+    def kill(self):
         return
 
     def update(self, dt):
@@ -605,19 +600,6 @@ class EnemyShot(Shot):
             # print("player hit")
 
 
-class Particle(Entity):
-    def init(self):
-        Entity.init(self)
-        self.radius = 2
-        self.life = 1000
-        self.speed = gameState.speed_particle
-        self.max_count = 120
-        self.direction = Vector.identity()
-
-    def create(self):
-        return Particle()
-
-
 class FloatingText(Entity):
     def init(self):
         Entity.init(self)
@@ -628,6 +610,12 @@ class FloatingText(Entity):
 
     def create(self):
         return FloatingText()
+
+    def blackHole(self):
+        return
+
+    def repel(self):
+        return
 
 
 class Player(Entity):
@@ -699,13 +687,16 @@ class EntityService:
     entities: dict[EntityType, list] = {}
     enemies: dict[EntityType, list] = {}
 
+    createParticles: any
+    createFloatingText: any
+
     defs: dict[EntityType, Entity] = {
         EntityType.pinkPinwheel: PinkPinwheel(),
         EntityType.blueDiamond: BlueDiamond(),
         EntityType.greenSquare: GreenSquare(),
         EntityType.purpleSquare: PurpleSquare(),
         EntityType.blueCircle: BlueCircle(),
-        EntityType.redCircle: RedCircle(),
+        EntityType.redCircle: None,
         EntityType.lineEnd: LineEnd(),
         EntityType.snake: Snake(),
         EntityType.snakeBody: SnakeBody(),
@@ -715,7 +706,7 @@ class EntityService:
         EntityType.player: Player(),
         EntityType.shot: Shot(),
         EntityType.enemyShot: EnemyShot(),
-        EntityType.particle: Particle(),
+        EntityType.particle: None,
         EntityType.floatingText: FloatingText(),
     }
 
@@ -792,6 +783,7 @@ class EntityService:
             e.toward(player.pos.x, player.pos.y, e.toward_range)
 
         e.repel()
+        e.blackHole()
         e.update(dt)
         e.damp()
 

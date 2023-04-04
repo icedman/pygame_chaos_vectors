@@ -2,11 +2,18 @@ from maths import *
 from state import gameState
 from entities import entityService, EntityType
 from grid import grid
-import particles
+from particles import Particle, createParticles, createFloatingText
+from blackhole import RedCircle, pullParticles
 
 
 class Game:
     size = []
+
+    def __init__(self):
+        entityService.defs[EntityType.redCircle] = RedCircle()
+        entityService.defs[EntityType.particle] = Particle()
+        entityService.createParticles = createParticles
+        entityService.createFloatingText = createFloatingText
 
     def setup(self, size):
         self.size = size
@@ -26,8 +33,8 @@ class Game:
         # entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
         # entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
         # entityService.attach(entityService.create(100, 100, EntityType.snake))
+        # entityService.attach(entityService.create(100, 100, EntityType.redCircle))
         # entityService.attach(entityService.create(100, 100, EntityType.redClone))
-        entityService.attach(entityService.create(100, 100, EntityType.redClone))
         # entityService.attach(entityService.create(100, 100, EntityType.generator))
         # for i in range(0, 10):
         #     entityService.attach(
@@ -54,6 +61,8 @@ class Game:
                 entityService.update(e, dt)
 
         self.spawn(gameState.tick)
+
+        pullParticles(gameState.tick)
 
     def randomCorner(self, c):
         x = 0
