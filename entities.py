@@ -2,6 +2,7 @@ from state import gameState
 from maths import *
 from enum import Enum
 from particles import initParticle
+from grid import grid
 
 
 class EntityType(Enum):
@@ -84,8 +85,10 @@ class Entity:
     def kill(self):
         e = self
         createFloatingText(e.pos.x, e.pos.y, "+{}".format(e.points), e.color)
-        createParticles(e.pos.x, e.pos.y, 4, e.color)
+        createParticles(e.pos.x, e.pos.y, 8, e.color)
         entityService.destroy(e)
+        grid.pull(e.pos.x, e.pos.y, 8, 8)
+        # grid.push(e.pos.x, e.pos.y, 8, 1)
 
     def control(self):
         return
@@ -190,6 +193,7 @@ def createFloatingText(x, y, text, color):
     p = entityService.create(x, y, EntityType.floatingText)
     p.text = text
     p.color = color
+    p.direction = Vector(0, -1)
     entityService.attach(p)
 
 
@@ -538,6 +542,7 @@ class Shot(Entity):
         self.radius = 10
         self.color = "yellow"
         self.speed = gameState.speed_shot
+        self.direction = Vector.identity()
 
     def create(self):
         return Shot()
@@ -586,6 +591,7 @@ class EnemyShot(Shot):
         self.radius = 10
         self.life = 2500
         self.speed = 4.45
+        self.direction = Vector.identity()
 
     def create(self):
         return EnemyShot()
@@ -606,6 +612,7 @@ class Particle(Entity):
         self.life = 1000
         self.speed = gameState.speed_particle
         self.max_count = 120
+        self.direction = Vector.identity()
 
     def create(self):
         return Particle()
@@ -771,10 +778,12 @@ class EntityService:
 
         # rotate
         if e.rotate_toward:
-            a = angleTo(0, 0, e.direction.x, e.direction.y)
+            a = angleTo(0, 0, e.direction.x, e.direction.y) + 360
+            e.angle += 360
             e.angle *= 4
             e.angle += a
             e.angle /= 5
+            e.angle -= 360
 
         player = gameState.player
         e.bound()

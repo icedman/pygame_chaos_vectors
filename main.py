@@ -3,7 +3,7 @@ from maths import *
 from game import Game
 from state import gameState
 from draw import Context
-from renderer import Renderer, renderShape
+from renderer import Renderer, renderShape, renderGrid
 
 pygame.init()
 size = [1280, 800]
@@ -42,6 +42,7 @@ while not done:
     game.update(dt)
 
     gfx.clear("black")
+    renderGrid(gfx)
 
     gfx.save()
 

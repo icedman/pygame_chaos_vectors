@@ -1,16 +1,21 @@
+from maths import *
 from state import gameState
 from entities import entityService, EntityType
-from maths import *
+from grid import grid
 import particles
 
 
 class Game:
+    size = []
+
     def setup(self, size):
+        self.size = size
         gameState.screen["width"] = size[0]
         gameState.screen["height"] = size[1]
         self.newGame()
 
     def newGame(self):
+        grid.init(self.size[0], self.size[1])
         gameState.init()
         entityService.init()
         gameState.player = entityService.create(0, 0, EntityType.player)
@@ -22,11 +27,12 @@ class Game:
         # entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
         # entityService.attach(entityService.create(100, 100, EntityType.snake))
         # entityService.attach(entityService.create(100, 100, EntityType.redClone))
+        entityService.attach(entityService.create(100, 100, EntityType.redClone))
         # entityService.attach(entityService.create(100, 100, EntityType.generator))
-        for i in range(0, 10):
-            entityService.attach(
-                entityService.create(Rand(100, 800), Rand(100, 600), EntityType.lineEnd)
-            )
+        # for i in range(0, 10):
+        #     entityService.attach(
+        #         entityService.create(Rand(100, 800), Rand(100, 600), EntityType.lineEnd)
+        #     )
 
         self.centerPlayer()
 
@@ -39,6 +45,7 @@ class Game:
 
     def update(self, dt):
         gameState.tick += dt
+        grid.update(dt)
 
         entities = self.entities()
         for k in entities.keys():
@@ -46,7 +53,7 @@ class Game:
             for e in ek:
                 entityService.update(e, dt)
 
-        # self.spawn(gameState.tick)
+        self.spawn(gameState.tick)
 
     def randomCorner(self, c):
         x = 0

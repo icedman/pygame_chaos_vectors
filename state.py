@@ -33,7 +33,16 @@ class GameState:
         self.speed_player = 4
         self.tick = 0
         self.cnt = 0
-        self.keys = {}
+        self.keys = {
+            "w": False,
+            "a": False,
+            "s": False,
+            "d": False,
+            "left": False,
+            "right": False,
+            "up": False,
+            "down": False,
+        }
         self.speed_nme = 0.75
         self.speed_shot = 8
         self.speed_particle = 3

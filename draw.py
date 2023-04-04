@@ -4,13 +4,18 @@ from fnt import *
 
 
 class ContextState:
-    strokeWidth = 3
+    color = "white"
+    strokeWidth = 2
     matrix: Matrix = Matrix.identity()
 
-    def __init__(self, copy=None):
+    def __init__(self, copy=None, cloneMatrix=True):
         if copy != None:
+            self.color = copy.color
             self.strokeWidth = copy.strokeWidth
-            self.matrix = Matrix.copy(copy.matrix)
+            if cloneMatrix:
+                self.matrix = Matrix.copy(copy.matrix)
+            else:
+                self.matrix = copy.matrix
 
 
 class Context:
@@ -23,6 +28,9 @@ class Context:
 
     def save(self):
         self._states.append(ContextState(self.state))
+
+    def saveAttributes(self):
+        self._states.append(ContextState(self.state, False))
 
     def restore(self):
         del self._states[len(self._states) - 1]
@@ -49,7 +57,9 @@ class Context:
     def clear(self, color):
         self.surface.fill(color)
 
-    def drawLine(self, x, y, x2, y2, color):
+    def drawLine(self, x, y, x2, y2, color=None):
+        if color == None:
+            color = self.state.color
         m = self.state.matrix
         v1 = Vector(x, y).transform(m)
         v2 = Vector(x2, y2).transform(m)
@@ -57,10 +67,10 @@ class Context:
             self.surface, color, [v1.x, v1.y], [v2.x, v2.y], self.state.strokeWidth
         )
 
-    def drawRect(self, x, y, w, h, color):
+    def drawRect(self, x, y, w, h, color=None):
         pygame.draw.rect(self.surface, color, [x, y, w, h], self.state.strokeWidth)
 
-    def drawPolygon(self, x, y, r, sides, color):
+    def drawPolygon(self, x, y, r, sides, color=None):
         if sides < 3:
             return
 
@@ -77,7 +87,7 @@ class Context:
             p2 = points[i]
             self.drawLine(p1[0], p1[1], p2[0], p2[1], color)
 
-    def drawPolygonPoints(self, points, color):
+    def drawPolygonPoints(self, points, color=None):
         for i in range(1, len(points) + 1):
             p1 = points[i - 1]
             k = i
@@ -86,7 +96,7 @@ class Context:
             p2 = points[k]
             self.drawLine(p1[0], p1[1], p2[0], p2[1], color)
 
-    def drawChar(self, x, y, c, size, color, extentsOnly=False):
+    def drawChar(self, x, y, c, size, color=None, extentsOnly=False):
         pts = fnt[C(c) - C(" ")]
         next_moveto = 1
         startPosition = {}
@@ -135,7 +145,7 @@ class Context:
 
         return adv
 
-    def drawText(self, x, y, text, size, color, align=0):
+    def drawText(self, x, y, text, size, color=None, align=0):
         text = text.upper()
 
         adv = 0

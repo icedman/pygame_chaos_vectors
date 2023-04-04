@@ -4,6 +4,7 @@ from state import gameState
 from draw import Context
 from entities import *
 from shapes import shapes
+from grid import grid
 
 
 def renderShape(ctx: Context, shape: str, x, y, r, color="red"):
@@ -100,3 +101,41 @@ class Renderer:
 
         if e.text != "":
             ctx.drawText(e.pos.x, e.pos.y, e.text, 2, e.color)
+
+
+def renderGridDots(ctx):
+    for c in grid.grid:
+        for r in c:
+            ctx.drawLine(r.x, r.y, r.x - 1, r.y - 1)
+
+
+def renderGridLines(ctx):
+    rc = len(grid.grid)
+    cc = len(grid.grid[0])
+
+    # vertical
+    for ir in range(0, rc):
+        prev = None
+        for ic in range(0, cc):
+            r = grid.grid[ir][ic]
+            if prev != None:
+                ctx.drawLine(r.x, r.y, prev.x, prev.y)
+            prev = r
+
+    # horizontal
+    for ic in range(0, cc):
+        prev = None
+        for ir in range(0, rc):
+            r = grid.grid[ir][ic]
+            if prev != None:
+                ctx.drawLine(r.x, r.y, prev.x, prev.y)
+            prev = r
+
+
+def renderGrid(ctx):
+    ctx.saveAttributes()
+    ctx.state.color = (50, 50, 50)
+    ctx.state.strokeWidth = 1
+    # renderGridDots(ctx)
+    renderGridLines(ctx)
+    ctx.restore()
