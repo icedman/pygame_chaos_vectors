@@ -98,9 +98,11 @@ class Matrix:
 
     def translate(self, x, y, z):
         self.M = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [x, y, z, 1]]
+        return self
 
     def scale(self, x, y, z):
         self.M = [[x, 0, 0, 0], [0, y, 0, 0], [0, 0, z, 0], [0, 0, 0, 1]]
+        return self
 
     def rotate(self, ax, ay, az):
         ROTSEQX = 1 << 1
@@ -128,7 +130,7 @@ class Matrix:
 
         if rotSeq == 0:
             self.M = mrot.M
-            return
+            return self
 
         if rotSeq & ROTSEQX:
             cosTheta = Cos(ax)
@@ -144,7 +146,7 @@ class Matrix:
             if rotSeq == ROTSEQX:
                 mrot = Matrix.copy(mx)
                 self.M = mrot.M
-                return
+                return self
 
         if rotSeq & ROTSEQY:
             cosTheta = Cos(ay)
@@ -160,7 +162,7 @@ class Matrix:
             if rotSeq == ROTSEQX:
                 mrot = Matrix.copy(my)
                 self.M = mrot.M
-                return
+                return self
 
         if rotSeq & ROTSEQZ:
             cosTheta = Cos(az)
@@ -176,7 +178,7 @@ class Matrix:
             if rotSeq == ROTSEQZ:
                 mrot = Matrix.copy(mz)
                 self.M = mrot.M
-                return
+                return self
 
         if rotSeq & ROTSEQX:
             if rotSeq & ROTSEQY:
@@ -184,22 +186,22 @@ class Matrix:
                     mtmp = Matrix.copy(mx).multiply(my)
                     mrot = Matrix.copy(mtmp).multiply(mz)
                     self.M = mrot.M
-                    return
+                    return self
                 mrot = Matrix.copy(mx).multiply(my)
                 self.M = mrot.M
-                return
+                return self
 
         if rotSeq & ROTSEQZ:
             if rotSeq & ROTSEQX:
                 mrot = Matrix.copy(mx).multiply(my)
                 self.M = mrot.M
-                return
+                return self
             mrot = Matrix.copy(my).multiply(mz)
             self.M = mrot.M
-            return
+            return self
 
         self.M = mrot.M
-        return
+        return self
 
 
 class Vector:

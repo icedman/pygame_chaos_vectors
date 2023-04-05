@@ -31,6 +31,13 @@ def renderDefault(ctx: Context, e: Entity):
         renderShape(
             ctx, e.shape, e.pos.x, e.pos.y, e.radius, e.angle + e.angle_offset, e.color
         )
+    elif e.polygon > 0:
+        ctx.save()
+        ctx.rotate((e.angle + 360 - 90) % 360)
+        ctx.scale(e.radius, e.radius)
+        ctx.translate(e.pos.x, e.pos.y)
+        ctx.drawPolygon(0, 0, 1, e.polygon, e.color)
+        ctx.restore()
     elif e.radius > 0:
         ctx.save()
         ctx.rotate(e.angle + e.angle_offset)
@@ -38,7 +45,42 @@ def renderDefault(ctx: Context, e: Entity):
         ctx.drawPolygon(0, 0, e.radius, 4, e.color)
         ctx.restore()
     if e.text != "":
-        ctx.drawText(e.pos.x, e.pos.y, e.text, 2, e.color)
+        ctx.saveAttributes()
+        ctx.state.strokeWidth = 1
+        ctx.drawText(e.pos.x, e.pos.y, e.text, 1.5, e.color)
+        ctx.restore()
+
+
+def renderPowerup(ctx: Context, e: Entity):
+    renderDefault(ctx, e)
+    ctx.drawText(e.pos.x + 3, e.pos.y + 8, "?", 1.5, "yellow")
+
+
+def renderBlackhole(ctx: Context, e: Entity):
+    renderDefault(ctx, e)
+    if e.active == False:
+        return
+
+    r = e.radius
+    angle = e.angle
+    color = e.color
+    shape = e.shape
+    e.radius += Rand(e.size, e.size + 20) / 4
+    if (e.radius) > 80:
+        e.radius = 80
+    e.angle += Rand(20, 40 + Floor(e.size / 10))
+    e.color = "cyan"
+    e.shape = ""
+    sz = Floor(e.size / 20)
+    if sz > 5:
+        sz = 5
+    e.polygon = 5 + sz
+    renderDefault(ctx, e)
+    e.radius = r
+    e.angle = angle
+    e.color = color
+    e.shape = shape
+    e.polygon = 0
 
 
 def renderLineEnd(ctx: Context, e: Entity):
@@ -66,7 +108,8 @@ def renderShot(ctx: Context, e: Entity):
 def renderParticle(ctx: Context, e: Entity):
     d = Vector.copy(e.direction)
     d.normalize()
-    d.scale(2)
+    pp = (e.life - e.tick) / (e.life + 1)
+    d.scale(e.radius + 4 * pp)
     ctx.drawLine(
         e.pos.x,
         e.pos.y,
@@ -84,7 +127,7 @@ class Renderer:
         EntityType.greenSquare: renderDefault,
         EntityType.purpleSquare: renderDefault,
         EntityType.blueCircle: renderDefault,
-        EntityType.redCircle: renderDefault,
+        EntityType.redCircle: renderBlackhole,
         EntityType.lineEnd: renderLineEnd,
         EntityType.snake: renderDefault,
         EntityType.redClone: renderDefault,
@@ -96,15 +139,13 @@ class Renderer:
         EntityType.enemyShot: renderShot,
         EntityType.particle: renderParticle,
         EntityType.floatingText: renderDefault,
+        EntityType.powerUp: renderPowerup,
     }
 
     @staticmethod
     def renderEntity(ctx: Context, e: Entity):
         r = Renderer.defs[e.type]
         r(ctx, e)
-
-        if e.text != "":
-            ctx.drawText(e.pos.x, e.pos.y, e.text, 2, e.color)
 
 
 def renderGridDots(ctx):
@@ -137,9 +178,10 @@ def renderGridLines(ctx):
 
 
 def renderGrid(ctx):
-    ctx.saveAttributes()
-    ctx.state.color = (50, 50, 50)
+    ctx.save()
+    ctx.scale(1, 1.05)
+    ctx.state.color = (55, 55, 55)
     ctx.state.strokeWidth = 1
-    # renderGridDots(ctx)
+    renderGridDots(ctx)
     renderGridLines(ctx)
     ctx.restore()

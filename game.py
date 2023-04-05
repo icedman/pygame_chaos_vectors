@@ -1,8 +1,10 @@
 from maths import *
 from state import gameState
-from entities import entityService, EntityType
+from entities import entityService, EntityType, randomCorner
 from grid import grid
 from particles import Particle, createParticles, createFloatingText
+from player import Player
+from powerup import PowerUp, updatePowers
 from blackhole import RedCircle, pullParticles
 
 
@@ -10,8 +12,10 @@ class Game:
     size = []
 
     def __init__(self):
+        entityService.defs[EntityType.player] = Player()
         entityService.defs[EntityType.redCircle] = RedCircle()
         entityService.defs[EntityType.particle] = Particle()
+        entityService.defs[EntityType.powerUp] = PowerUp()
         entityService.createParticles = createParticles
         entityService.createFloatingText = createFloatingText
 
@@ -28,14 +32,15 @@ class Game:
         gameState.player = entityService.create(0, 0, EntityType.player)
         entityService.attach(gameState.player)
 
-        entityService.attach(entityService.create(100, 100, EntityType.pinkPinwheel))
-        entityService.attach(entityService.create(100, 100, EntityType.greenSquare))
-        entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
-        entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
-        entityService.attach(entityService.create(100, 100, EntityType.snake))
+        # entityService.attach(entityService.create(100, 100, EntityType.pinkPinwheel))
+        # entityService.attach(entityService.create(100, 100, EntityType.greenSquare))
+        # entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
+        # entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
+        # entityService.attach(entityService.create(100, 100, EntityType.snake))
         # entityService.attach(entityService.create(100, 100, EntityType.redCircle))
-        entityService.attach(entityService.create(100, 100, EntityType.redClone))
-        entityService.attach(entityService.create(100, 100, EntityType.generator))
+        # entityService.attach(entityService.create(100, 100, EntityType.powerUp))
+        # entityService.attach(entityService.create(100, 100, EntityType.redClone))
+        # entityService.attach(entityService.create(100, 100, EntityType.generator))
         # for i in range(0, 10):
         #     entityService.attach(
         #         entityService.create(Rand(100, 800), Rand(100, 600), EntityType.lineEnd)
@@ -47,14 +52,13 @@ class Game:
         gameState.player.pos.x = gameState.screen["width"] / 2
         gameState.player.pos.y = gameState.screen["height"] / 2
 
-    def entities(self):
-        return entityService.entities
-
     def update(self, dt):
         gameState.tick += dt
         grid.update(dt)
+        updatePowers(dt)
 
-        entities = self.entities()
+        entities = entityService.entities
+
         for k in entities.keys():
             ek = entities[k]
             for e in ek:
@@ -64,56 +68,13 @@ class Game:
 
         pullParticles(gameState.tick)
 
-    def randomCorner(self, c):
-        x = 0
-        y = 0
-        corner = Floor(c)
-
-        if corner > 4 and corner < 12:
-            pair = [
-                [],
-                [],
-                [],
-                [],
-                [],
-                [1, 4],
-                [1, 2],
-                [2, 3],
-                [3, 4],
-                [1, 3],
-                [1, 4],
-                [2, 4],
-            ]
-            p = pair[corner]
-            corner = Rand(1, 4) if (corner == 5) else RndOr(p[0], p[1])
-
-        if corner < 5:
-            pw = gameState.screen["width"]
-            ph = gameState.screen["height"]
-            cp = [
-                [30, pw - 30, 30, ph - 30],
-                [30, 80, 30, 80],
-                [pw - 80, pw - 30, 30, 80],
-                [pw - 80, pw - 30, ph - 80, ph - 30],
-                [30, 80, ph - 80, ph - 30],
-            ][corner]
-            x = Rand(cp[0], cp[1])
-            y = Rand(cp[2], cp[3])
-        else:
-            angle = Rand(0, 360)
-            mag = 240
-            x = gameState.player.pos.x + Cos(angle) * mag
-            y = gameState.player.pos.y + Sin(angle) * mag
-
-        return Vector(x, y)
-
     def randomEnemy(self, gt, plus=0):
         sel = Min(Floor(gt / 1100), 8)
         rr = [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], [0, 8], [0, 9]]
         return EntityType(Rand(rr[sel][0], rr[sel][1]) + plus)
 
     def spawnEnemy(self, type, freeze, corner, gen=EntityType.none):
-        corner = self.randomCorner(corner)
+        corner = randomCorner(corner)
         x = corner.x
         y = corner.y
 
@@ -130,7 +91,6 @@ class Game:
             return
 
         gameState.last_gt = gtt
-
         gameState.spawn_gt += 1
         gt = gameState.spawn_gt
 

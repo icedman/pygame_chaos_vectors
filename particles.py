@@ -9,7 +9,7 @@ class Particle(Entity):
         self.radius = 2
         self.life = 1000
         self.speed = gameState.speed_particle
-        self.max_count = 120
+        self.max_count = 200
         self.direction = Vector.identity()
 
     def create(self):
@@ -19,7 +19,7 @@ class Particle(Entity):
         return
 
     def kill(self):
-        return
+        return False
 
 
 def initParticle(p, type=0, rot=0, sz=1):
@@ -101,4 +101,7 @@ def createFloatingText(x, y, text, color):
     p.text = text
     p.color = color
     p.direction = Vector(0, -1)
+    p.speed = 2
+    p.life = 750
     entityService.attach(p)
+    return p

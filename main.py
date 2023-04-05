@@ -3,6 +3,7 @@ from maths import *
 from game import Game
 from state import gameState
 from draw import Context
+from entities import entityService
 from renderer import Renderer, renderShape, renderGrid
 
 pygame.init()
@@ -42,6 +43,7 @@ while not done:
     game.update(dt)
 
     gfx.clear("black")
+    gfx.drawRect(1, 1, size[0], size[1], "red")
     renderGrid(gfx)
 
     gfx.save()
@@ -55,11 +57,15 @@ while not done:
     # gfx.restore()
     # renderShape(gfx, 'square_diamond', 200, 200, 40)
 
-    entities = game.entities()
+    entities = entityService.entities
     for k in entities.keys():
         ek = entities[k]
         for e in ek:
             Renderer.renderEntity(gfx, e)
 
     gfx.restore()
+
+    # draw heads-up
+    gfx.drawText(size[0] - 10, 40, "{}".format(gameState.score), 1.5, "yellow", 2)
+    gfx.drawText(15, 40, "Ships:{}".format(gameState.ships), 1.5, "yellow", 1)
     pygame.display.flip()
