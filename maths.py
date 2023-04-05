@@ -64,7 +64,7 @@ def Floor(a):
 
 
 class Matrix:
-    M: list[list] = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+    M = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
 
     @staticmethod
     def identity():
@@ -203,7 +203,7 @@ class Matrix:
 
 
 class Vector:
-    M: list[int] = [0, 0, 0]
+    M = [0, 0, 0]
 
     def __init__(self, x=0, y=0, z=0):
         self.M = [x, y, z]

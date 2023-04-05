@@ -59,6 +59,9 @@ class Entity:
     generate_what: EntityType = EntityType.none
     generate_size = 0
 
+    # hints
+    angle_offset = 0
+
     def init(self):
         n = self
         dir = Rand(0, 359)
@@ -273,6 +276,7 @@ class BlueCircle(Entity):
         Entity.init(self)
         self.radius = 12
         self.color = "blue"
+        self.shape = "hexagon"
         self.speed = 4.35
         self.toward_range = gameState.screen["width"]
 
@@ -287,6 +291,7 @@ class RedClone(Entity):
         Entity.init(self)
         self.radius = 16
         self.color = "red"
+        self.shape = "ship"
         self.speed = 2.45
         self.shield = 5
         self.spin_speed = 0
@@ -322,6 +327,7 @@ class Butterfly(Entity):
         Entity.init(self)
         self.radius = 10
         self.color = "yellow"
+        self.shape = "triangle"
         self.speed = 5
         self.direction = Vector(0, 0)
 
@@ -334,11 +340,14 @@ class Snake(Entity):
         Entity.init(self)
         self.radius = 16
         self.color = "magenta"
+        self.shape = "triangle"
+        self.rotate_toward = True
         self.speed = 3.5
         self.rotation = Rand(0, 360)
         self.spin_speed = 0
         self.shield = 3
         self.max_count = 12
+        self.angle_offset = 90 + 180
 
     def create(self):
         return Snake()
@@ -390,10 +399,12 @@ class SnakeBody(Entity):
         Entity.init(self)
         self.radius = 10
         self.color = "white"
+        self.shape = "triangle"
         self.speed = 3.5
         self.rotate_toward = True
         self.spin_speed = 0
         self.max_count = 80
+        self.angle_offset = 90
 
     def create(self):
         return SnakeBody()
@@ -446,6 +457,7 @@ class LineEnd(Entity):
         Entity.init(self)
         self.radius = 12
         self.color = "blue"
+        self.color = "triangle"
         self.speed = 1.0
         self.toward_range = gameState.screen["width"]
 
@@ -499,6 +511,7 @@ class Generator(Entity):
         Entity.init(self)
         self.radius = 16
         self.color = "yellow"
+        self.shape = "pentagon"
         self.speed = 2
         self.spin_speed = 0.5
         self.shield = 2
@@ -623,8 +636,9 @@ class Player(Entity):
 
     def init(self):
         Entity.init(self)
-        self.radius = 12
+        self.radius = 16
         self.color = "white"
+        self.shape = "ship"
         self.rotate_toward = True
         self.direction = Vector()
 
@@ -647,10 +661,12 @@ class Player(Entity):
         if mx != 0 or my != 0:
             self.last_direction = Vector(mx, my)
 
-        a = angleTo(0, 0, n.last_direction.x, n.last_direction.y)
+        a = angleTo(0, 0, n.last_direction.x, n.last_direction.y) + 360
+        n.angle += 360
         n.angle *= 4
         n.angle += a
         n.angle /= 5
+        n.angle -= 360
 
         fx = 1 if (keys["right"] == True) else 0
         fx += -1 if (keys["left"] == True) else 0
@@ -684,13 +700,13 @@ class Player(Entity):
 
 class EntityService:
     last_shot = 0
-    entities: dict[EntityType, list] = {}
-    enemies: dict[EntityType, list] = {}
+    entities = {}
+    enemies = {}
 
     createParticles: any
     createFloatingText: any
 
-    defs: dict[EntityType, Entity] = {
+    defs = {
         EntityType.pinkPinwheel: PinkPinwheel(),
         EntityType.blueDiamond: BlueDiamond(),
         EntityType.greenSquare: GreenSquare(),

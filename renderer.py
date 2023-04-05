@@ -7,29 +7,33 @@ from shapes import shapes
 from grid import grid
 
 
-def renderShape(ctx: Context, shape: str, x, y, r, color="red"):
+def renderShape(ctx: Context, shape: str, x, y, r, angle, color="red"):
     sl = shapes[shape]["shapes"]
     ctx.save()
+    ctx.rotate((angle + 360 - 90) % 360)
     ctx.scale(r, r)
     ctx.translate(x, y)
     for s in sl:
-        points = []
-        for p in s["points"]:
-            points.append(p)
-        ctx.translate(points[0][0] * r, points[0][1] * r)
-        del points[0]
-        ctx.drawPolygonPoints(points, color)
+        if "points" in s:
+            points = []
+            for p in s["points"]:
+                points.append(p)
+            ctx.translate(points[0][0] * r, points[0][1] * r)
+            del points[0]
+            ctx.drawPolygonPoints(points, color)
+        if "polygon" in s:
+            ctx.drawPolygon(0, 0, s["scale"], s["polygon"], color)
     ctx.restore()
 
 
-def renderEntityShape(ctx: Context, e: Entity):
-    return
-
-
 def renderDefault(ctx: Context, e: Entity):
-    if e.radius > 0:
+    if e.shape != "":
+        renderShape(
+            ctx, e.shape, e.pos.x, e.pos.y, e.radius, e.angle + e.angle_offset, e.color
+        )
+    elif e.radius > 0:
         ctx.save()
-        ctx.rotate(e.angle)
+        ctx.rotate(e.angle + e.angle_offset)
         ctx.translate(e.pos.x, e.pos.y)
         ctx.drawPolygon(0, 0, e.radius, 4, e.color)
         ctx.restore()

@@ -19,7 +19,7 @@ class ContextState:
 
 
 class Context:
-    _states: list[ContextState] = []
+    _states = []
     surface: any = None
 
     def __init__(self, surface):

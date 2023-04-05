@@ -60,8 +60,8 @@ class GridLine:
 
 
 class Grid:
-    grid: list[list[GridPoint, GridPoint]] = []
-    lines: list[GridLine] = []
+    grid = []
+    lines = []
 
     SCREENW = 1024
     SCREENH = 768

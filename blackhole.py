@@ -12,6 +12,7 @@ class RedCircle(Entity):
         Entity.init(self)
         self.radius = 16
         self.color = "red"
+        self.shape = "pentagon"
         self.speed = 2.5
         self.direction = Vector(0, 0)
         self.max_count = 6
@@ -21,6 +22,7 @@ class RedCircle(Entity):
 
     def update(self, dt):
         speedScale = 1
+
         #   if (move > 0):
         #     move = move -1 * speedScale
         #     return

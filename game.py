@@ -28,14 +28,14 @@ class Game:
         gameState.player = entityService.create(0, 0, EntityType.player)
         entityService.attach(gameState.player)
 
-        # entityService.attach(entityService.create(100, 100, EntityType.pinkPinwheel))
-        # entityService.attach(entityService.create(100, 100, EntityType.greenSquare))
-        # entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
-        # entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
-        # entityService.attach(entityService.create(100, 100, EntityType.snake))
+        entityService.attach(entityService.create(100, 100, EntityType.pinkPinwheel))
+        entityService.attach(entityService.create(100, 100, EntityType.greenSquare))
+        entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
+        entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
+        entityService.attach(entityService.create(100, 100, EntityType.snake))
         # entityService.attach(entityService.create(100, 100, EntityType.redCircle))
-        # entityService.attach(entityService.create(100, 100, EntityType.redClone))
-        # entityService.attach(entityService.create(100, 100, EntityType.generator))
+        entityService.attach(entityService.create(100, 100, EntityType.redClone))
+        entityService.attach(entityService.create(100, 100, EntityType.generator))
         # for i in range(0, 10):
         #     entityService.attach(
         #         entityService.create(Rand(100, 800), Rand(100, 600), EntityType.lineEnd)

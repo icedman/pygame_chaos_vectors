@@ -8,7 +8,7 @@ class GameState:
     tick = 0
     cnt = 0
     screen = {"width": 1024, "height": 768}
-    keys: dict[str, bool] = {
+    keys = {
         "w": False,
         "a": False,
         "s": False,
