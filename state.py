@@ -18,7 +18,10 @@ class GameState:
         "right": False,
         "up": False,
         "down": False,
+        "p": False,
+        " ": False
     }
+    last_pressed = []
 
     speed_enemy = 0.75
     speed_shot = 8
@@ -51,7 +54,10 @@ class GameState:
             "right": False,
             "up": False,
             "down": False,
+            "p": False,
+            " ": False
         }
+        self.last_pressed = []
         self.speed_enemy = 0.75
         self.speed_shot = 4
         self.speed_particle = 3

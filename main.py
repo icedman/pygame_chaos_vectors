@@ -19,6 +19,7 @@ gfx = Context(screen)
 game = Game()
 game.setup(size)
 
+paused = False
 menu_gt = 0
 last_tick = 0
 
@@ -32,7 +33,8 @@ def enter_scene(scn):
 
 
 def game_loop(dt):
-    game.update(dt)
+    if paused == False:
+        game.update(dt)
 
     gfx.clear("black")
 
@@ -47,8 +49,6 @@ def game_loop(dt):
             Renderer.renderEntity(gfx, e)
 
     gfx.restore()
-
-    gameState.powers[PowerType.multiplier] = 2
 
     # draw heads-up
     gfx.drawText(size[0] - 10, 40, "{}".format(gameState.score), 1.5, "magenta", 2)
@@ -155,6 +155,20 @@ while not done:
     gameState.keys["right"] = pressed[pygame.K_RIGHT]
     gameState.keys["up"] = pressed[pygame.K_UP]
     gameState.keys["down"] = pressed[pygame.K_DOWN]
+    gameState.keys["p"] = pressed[pygame.K_p]
+
+    released = []
+    for k in gameState.last_pressed:
+        if gameState.keys[k] == False:
+            released.append(k)
+
+    gameState.last_pressed = []
+    for k in gameState.keys:
+        if gameState.keys[k]:
+            gameState.last_pressed.append(k)
+
+    if "p" in released:
+        paused = not paused
 
     if gameState.scene == 0:
         menu_loop(dt)
