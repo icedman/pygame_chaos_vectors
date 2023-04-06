@@ -700,7 +700,7 @@ class Explosion(Entity):
         self.life = 500
         self.max_count = 20
         self.polygon = 8
-        self.spin_speed = 1
+        self.spin_speed = 2
         self.direction = Vector.identity()
 
     def create(self):

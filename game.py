@@ -58,6 +58,7 @@ class Game:
         if gameState.ships > 0:
             gameState.ships -= 1
             gameState.powers = {}
+            gameState.shield = 1
             self.newGame(True)
         else:
             gameState.gameOver = True

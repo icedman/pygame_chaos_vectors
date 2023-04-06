@@ -10,8 +10,8 @@ from sounds import soundService, Effects
 from powerup import PowerType
 
 pygame.init()
-# size = [1800, 900]
-size = [1280, 800]
+size = [1600, 900]
+# size = [1280, 800]
 screen = pygame.display.set_mode(size)
 done = False
 gfx = Context(screen)
@@ -129,7 +129,7 @@ soundService.defs[Effects.explosion] = pygame.mixer.Sound("./sounds/draven/bomb.
 for d in soundService.defs:
     soundService.defs[d].set_volume(0.25)
 
-enter_scene(1)
+enter_scene(0)
 while not done:
     tick = pygame.time.get_ticks()
     dt = tick - last_tick
