@@ -2,6 +2,7 @@ from state import gameState
 from maths import *
 from enum import Enum
 from grid import grid
+from sounds import soundService, Effects
 
 
 def randomCorner(c):
@@ -109,6 +110,7 @@ class Entity:
 
     # hints
     angle_offset = 0
+    spawn_effect = Effects.none
 
     def init(self):
         n = self
@@ -135,13 +137,14 @@ class Entity:
     def kill(self, killer):
         e = self
         if e.points > 0:
-            points = e.points * gameState.multiplier()
+            points = e.points * gameState.multipler
             entityService.createFloatingText(
                 e.pos.x, e.pos.y, "+{}".format(points), e.color
             )
             gameState.score += points
         entityService.createParticles(e.pos.x, e.pos.y, 8, e.color)
         entityService.destroy(e)
+        soundService.play(Effects.destroy)
         grid.push(e.pos.x, e.pos.y, 8, 1)
 
         return True
@@ -280,6 +283,7 @@ class PinkPinwheel(Entity):
         self.speed = 2.25
         self.points = 20
         self.shape = "pinwheel"
+        self.spawn_effect = Effects.spawn3
 
     def create(self):
         return PinkPinwheel()
@@ -293,6 +297,7 @@ class BlueDiamond(Entity):
         self.speed = 3.25
         self.points = 50
         self.toward_range = gameState.screen["width"]
+        self.spawn_effect = Effects.spawn3
 
     def create(self):
         return BlueDiamond()
@@ -308,6 +313,7 @@ class PurpleSquare(Entity):
         self.max_count = 120
         self.points = 100
         self.shape = "square_diamond"
+        self.spawn_effect = Effects.spawn3
 
     def create(self):
         return PurpleSquare()
@@ -360,6 +366,7 @@ class RedClone(Entity):
         self.rotate_toward = True
         self.toward_range = gameState.screen["width"]
         self.points = 2000
+        self.spawn_effect = Effects.spawn1
 
     def create(self):
         return RedClone()
@@ -395,6 +402,7 @@ class Butterfly(Entity):
         self.direction = Vector(0, 0)
         self.max_count = 60
         self.points = 300
+        self.spawn_effect = Effects.spawn3
 
     def create(self):
         return Butterfly()
@@ -414,6 +422,7 @@ class Snake(Entity):
         self.max_count = 12
         self.points = 1000
         self.angle_offset = 45
+        self.spawn_effect = Effects.spawn1
 
     def create(self):
         return Snake()
@@ -524,6 +533,7 @@ class LineEnd(Entity):
         self.toward_range = gameState.screen["width"]
         self.max_count = 60
         self.points = 500
+        self.spawn_effect = Effects.spawn3
 
     def create(self):
         return LineEnd()
@@ -588,6 +598,7 @@ class Generator(Entity):
         self.generate_size = 10
         self.generate_rate = 30
         self.points = 1000
+        self.spawn_effect = Effects.spawn2
 
     def create(self):
         return Generator()
@@ -670,6 +681,7 @@ class Bomb(Shot):
         self.polygon = 8
         self.superShot = True
         self.direction = Vector.identity()
+        self.spawn_effect = Effects.explosion
 
     def create(self):
         return Bomb()
@@ -801,8 +813,9 @@ class EntityService:
     def attach(self, e):
         base = self.defs[e.type]
         if base.max_count > 0 and len(self.entities[e.type]) >= base.max_count:
-            return
+            return None
         self.entities[e.type].append(e)
+        return e
 
     def destroy(self, e: Entity):
         try:

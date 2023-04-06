@@ -2,6 +2,7 @@ from entities import entityService, Entity, EntityType
 from state import gameState
 from grid import grid
 from maths import *
+from sounds import soundService, Effects
 
 
 class RedCircle(Entity):
@@ -19,6 +20,7 @@ class RedCircle(Entity):
         self.shield = 0
         self.max_count = 6
         self.points = 1000
+        self.spawn_effect = Effects.spawn2
 
     def create(self):
         return RedCircle()
@@ -48,14 +50,11 @@ class RedCircle(Entity):
         x = x + dx * speedScale
         y = y + dy * speedScale
 
-        #   // radius = 12 + (sz/2)
-
         #   gcenterx = x+Sin(r*3)*sz/2.5
         #   gcentery = y+Cos(r*3)*sz/2.5
 
         if self.active:
             grid.pull(x, y, (int)(sz / 12))
-            # '/3)
 
         #   DoubleSun()
 
@@ -136,6 +135,7 @@ class RedCircle(Entity):
             entityService.attach(entityService.create(xx, yy, EntityType.butterfly))
 
         entityService.destroy(self)
+        soundService.play(Effects.explosion)
         grid.push(self.pos.x, self.pos.y, 8, 4)
 
     def blackhole(self):

@@ -261,16 +261,19 @@ class Vector:
         self.x += v.x
         self.y += v.y
         self.z += v.z
+        return self
 
     def subtract(self, v):
         self.x -= v.x
         self.y -= v.y
         self.z -= v.z
+        return self
 
     def scale(self, s):
         self.x *= s
         self.y *= s
         self.z *= s
+        return self
 
     def normalize(self):
         l = self.length()
@@ -278,11 +281,12 @@ class Vector:
             self.x = 0
             self.y = 0
             self.z = 0
-            return
+            return self
 
         self.x = self.x / l
         self.y = self.y / l
         self.z = self.z / l
+        return self
 
     def length(self):
         fx = self.x

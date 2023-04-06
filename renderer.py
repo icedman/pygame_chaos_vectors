@@ -71,12 +71,22 @@ def renderBomb(ctx: Context, e: Entity):
 
 
 def renderPlayer(ctx: Context, e: Entity):
+    points = []
+    for i in range(0, len(e.last_positions), 3):
+        v = e.last_positions[i]
+        points.append([v.x, v.y])
+    if len(points) > 2:
+        ctx.saveAttributes()
+        ctx.state.strokeWidth = 3
+        ctx.drawPolygonPoints(points, "orange", False)
+        ctx.restore()
+
     renderDefault(ctx, e)
     if gameState.shield > 0:
         ctx.saveAttributes()
         t = Floor(gameState.shield if gameState.shield < 4 else 4)
         ctx.state.strokeWidth = 1 + t
-        clrs = [(80, 80, 80), "red", "cyan", "cyan", "cyan"]
+        clrs = ["red", "orange", "cyan", "cyan", "cyan"]
         renderPolygon(ctx, 7, e.pos.x, e.pos.y, e.radius + 10, e.angle, clrs[t])
         ctx.restore()
 

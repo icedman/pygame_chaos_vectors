@@ -6,6 +6,7 @@ from particles import Particle, createParticles, createFloatingText
 from player import Player
 from powerup import PowerUp, updatePowers
 from blackhole import RedCircle, pullParticles
+from sounds import soundService, Effects
 
 
 class Game:
@@ -36,7 +37,7 @@ class Game:
         # entityService.attach(entityService.create(100, 100, EntityType.pinkPinwheel))
         # entityService.attach(entityService.create(100, 100, EntityType.greenSquare))
         # entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
-        entityService.attach(entityService.create(100, 100, EntityType.blueDiamond))
+        # entityService.attach(entityService.create(100, 100, EntityType.blueDiamond))
         # entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
         # entityService.attach(entityService.create(100, 100, EntityType.snake))
         # entityService.attach(entityService.create(100, 100, EntityType.redCircle))
@@ -50,9 +51,13 @@ class Game:
 
         self.centerPlayer()
 
+    def clear(self):
+        entityService.init()
+
     def resetGame(self):
         if gameState.ships > 0:
             gameState.ships -= 1
+            gameState.powers = {}
             self.newGame(True)
         else:
             gameState.gameOver = True
@@ -106,12 +111,16 @@ class Game:
         enemy.generate_what = gen
         entityService.attach(enemy)
 
+        soundService.play(enemy.spawn_effect)
         return enemy
 
     def spawn(self, t):
+        # no spawn when..
         if gameState.gameOver:
             return
         if gameState.tick < 500:
+            return
+        if len(entityService.entities[EntityType.explosion]) > 0:
             return
 
         gtt = Floor(t / 20)

@@ -1,4 +1,5 @@
 class GameState:
+    scene = 0
     spawn_count = [0, 0, 0, 0]
     starting_difficulty = 0
 
@@ -32,6 +33,7 @@ class GameState:
     ships = 3
     bombs = 3
     shield = 3
+    multiplier = 1
 
     powers = {}
 
@@ -62,14 +64,9 @@ class GameState:
         self.score = 0
         self.ships = 3
         self.bombs = 3
-        self.shield = 0
+        self.shield = 3
         self.powers = {}
-
-    def multiplier(self):
-        # PowerType.multiplier
-        if 7 in self.powers:
-            return self.powers[7] + 1
-        return 1
+        self.multipler = 1
 
 
 gameState = GameState()

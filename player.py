@@ -3,6 +3,7 @@ from state import gameState
 from grid import grid
 from maths import *
 from powerup import PowerType
+from sounds import soundService, Effects
 
 
 class Player(Entity):
@@ -17,6 +18,8 @@ class Player(Entity):
     space_gt = 0
     dead_gt = 0
 
+    last_positions = []
+
     def init(self):
         Entity.init(self)
         self.radius = 16
@@ -26,6 +29,7 @@ class Player(Entity):
         self.direction = Vector()
         self.space_gt = 0
         self.dead_gt = 0
+        self.last_positions = []
 
     def create(self):
         return Player()
@@ -57,6 +61,7 @@ class Player(Entity):
             if len(entityService.entities[EntityType.bomb]) == 0:
                 bomb = entityService.create(self.pos.x, self.pos.y, EntityType.bomb)
                 entityService.attach(bomb)
+                soundService.play(bomb.spawn_effect)
                 gameState.bombs -= 1
 
         n.direction.scale(2)
@@ -87,6 +92,8 @@ class Player(Entity):
             shotdir = Vector(fx * shotspeed, fy * shotspeed)
             self.shoot(shotdir)
 
+            soundService.play(Effects.shot)
+
             if PowerType.rearCannons in gameState.powers:
                 rearShot = Vector.copy(shotdir).transform(self.mRotate180)
                 self.shoot(rearShot)
@@ -99,8 +106,11 @@ class Player(Entity):
 
     def update(self, dt):
         enemies = entityService.enemies
-
         e = self
+
+        self.last_positions.append(e.pos)
+        if len(self.last_positions) > 10:
+            del self.last_positions[0]
 
         # die from enemies
         e.color = "white"
@@ -112,16 +122,17 @@ class Player(Entity):
                 if dist < (n.radius + e.radius):
                     e.color = "red"
                     n.kill(self)
-                    # print("{} {} - {} {}".format(n.pos.x, n.pos.y, self.pos.x, self.pos.y))
                     if gameState.shield > 0:
-                        gameState.shield -= 0.25
+                        gameState.shield -= 0.4
                     else:
                         self.kill(n)
                         explosion = entityService.create(
                             self.pos.x, self.pos.y, EntityType.explosion
                         )
+                        grid.push(e.pos.x, e.pos.y, 8, 1)
                         explosion.life *= 2
                         entityService.attach(explosion)
+                        soundService.play(Effects.explosion)
                     return
 
     def kill(self, killer):

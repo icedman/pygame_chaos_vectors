@@ -4,6 +4,7 @@ from grid import grid
 from maths import *
 from enum import Enum
 from grid import grid
+from sounds import soundService, Effects
 
 
 class PowerType(Enum):
@@ -55,6 +56,7 @@ class PowerUp(Entity):
         self.shield = 0
         self.max_count = 8
         self.life = 12000
+        self.spawn_effect = Effects.spawn5
 
     def create(self):
         return PowerUp()
@@ -72,11 +74,12 @@ class PowerUp(Entity):
 
     def activate(self):
         e = self
+        grid.push(e.pos.x, e.pos.y, 8, 1)
         entityService.destroy(e)
         entityService.attach(
             entityService.create(e.pos.x, e.pos.y, EntityType.explosion)
         )
-        # animate
+        soundService.play(Effects.powerup)
 
         type = PowerType(self.defs[Rand(0, len(self.defs) - 1)])
         text = ""
@@ -86,6 +89,10 @@ class PowerUp(Entity):
         else:
             gameState.powers[type] += 1
 
+        gameState.multipler = 1
+        if PowerType.multiplier in gameState.powers:
+            gameState.multipler += gameState.powers[PowerType.multiplier]
+
         for t in range(0, 4):
             max = 0
             if type == PowerType.speedUp:
@@ -94,6 +101,8 @@ class PowerUp(Entity):
             elif type == PowerType.shield:
                 text = "shield"
                 gameState.shield += 1
+                if gameState.shield > 5:
+                    gameState.shield = 5
             elif type == PowerType.rearCannons:
                 text = "rear cannons"
             elif type == PowerType.moreShots:
@@ -102,20 +111,24 @@ class PowerUp(Entity):
                 text = "shot speed"
                 max = 4
             elif type == PowerType.multiplier:
-                text = "multiplier x{}".format(gameState.multiplier())
+                text = "multiplier"
                 max = 4
             elif type == PowerType.bomb:
                 text = "bomb"
                 gameState.bombs += 1
+                if gameState.bombs > 5:
+                    gameState.bombs = 5
                 break
             elif type == PowerType.lifeUp:
                 text = "ship"
                 gameState.ships += 1
+                if gameState.ships > 5:
+                    gameState.ships = 5
                 break
             # elif type == PowerType.superShots:
             #     text = "super shots"
             else:
-                points = 1000 * gameState.multiplier()
+                points = 1000 * gameState.multipler
                 gameState.score += points
                 text = "+{}".format(points)
                 break
@@ -128,7 +141,7 @@ class PowerUp(Entity):
             max if gameState.powers[type] > max and max > 0 else gameState.powers[type]
         )
 
-        entityService.createFloatingText(e.pos.x, e.pos.y, text, "yellow")
+        entityService.createFloatingText(e.pos.x, e.pos.y, text, "red")
 
 
 def updatePowers(dt):
@@ -145,9 +158,11 @@ def updatePowers(dt):
     if gameState.power_gt > spawnEvery and Rand(0, 100) < 20:
         corner = randomCorner(Rand(0, 12))
         gameState.power_gt = 0
-        entityService.attach(
+        powerup = entityService.attach(
             entityService.create(corner.x, corner.y, EntityType.powerUp)
         )
+        if powerup != None:
+            soundService.play(powerup.spawn_effect)
 
     gameState.speed_player = 1.8
     if PowerType.speedUp in gameState.powers:
