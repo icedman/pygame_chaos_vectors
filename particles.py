@@ -18,7 +18,7 @@ class Particle(Entity):
     def repel(self):
         return
 
-    def kill(self):
+    def kill(self, killer):
         return False
 
 
@@ -102,6 +102,6 @@ def createFloatingText(x, y, text, color):
     p.color = color
     p.direction = Vector(0, -1)
     p.speed = 2
-    p.life = 750
+    p.life = 1250
     entityService.attach(p)
     return p

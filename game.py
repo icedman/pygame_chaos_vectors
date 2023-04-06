@@ -25,9 +25,10 @@ class Game:
         gameState.screen["height"] = size[1]
         self.newGame()
 
-    def newGame(self):
+    def newGame(self, retainState=False):
         grid.init(self.size[0], self.size[1])
-        gameState.init()
+        if retainState != True:
+            gameState.init()
         entityService.init()
         gameState.player = entityService.create(0, 0, EntityType.player)
         entityService.attach(gameState.player)
@@ -35,6 +36,7 @@ class Game:
         # entityService.attach(entityService.create(100, 100, EntityType.pinkPinwheel))
         # entityService.attach(entityService.create(100, 100, EntityType.greenSquare))
         # entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
+        entityService.attach(entityService.create(100, 100, EntityType.blueDiamond))
         # entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
         # entityService.attach(entityService.create(100, 100, EntityType.snake))
         # entityService.attach(entityService.create(100, 100, EntityType.redCircle))
@@ -47,6 +49,14 @@ class Game:
         #     )
 
         self.centerPlayer()
+
+    def resetGame(self):
+        if gameState.ships > 0:
+            gameState.ships -= 1
+            self.newGame(True)
+        else:
+            gameState.gameOver = True
+            entityService.entities[EntityType.powerUp] = []
 
     def centerPlayer(self):
         gameState.player.pos.x = gameState.screen["width"] / 2
@@ -68,6 +78,11 @@ class Game:
 
         pullParticles(gameState.tick)
 
+        if gameState.player.dead_gt > 0:
+            gameState.player.dead_gt -= 1
+            if gameState.player.dead_gt == 0:
+                self.resetGame()
+
     def randomEnemy(self, gt, plus=0):
         sel = Min(Floor(gt / 1100), 8)
         rr = [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], [0, 8], [0, 9]]
@@ -78,14 +93,27 @@ class Game:
         x = corner.x
         y = corner.y
 
-        # valid and safeXY
+        # safe from player
+        # player = gameState.player
+        # pos = Vector(x, y)
+        # ppos = Vector.copy(player.pos)
+        # dist = pos.distanceTo(ppos)
+        # if dist < player.radius * 2:
+        #     print('move to safety')
+
         enemy = entityService.create(x, y, EntityType(type), freeze)
+
         enemy.generate_what = gen
         entityService.attach(enemy)
 
         return enemy
 
     def spawn(self, t):
+        if gameState.gameOver:
+            return
+        if gameState.tick < 500:
+            return
+
         gtt = Floor(t / 20)
         if gtt == gameState.last_gt or gtt == 0:
             return
@@ -96,7 +124,7 @@ class Game:
 
         # just random
         if ((gt / 350) % 2 < 1) and (gt % 33 < 1):
-            self.spawnEnemy(self.randomEnemy(gt), 0, Rand(0, 12))
+            self.spawnEnemy(self.randomEnemy(gt), 20, Rand(0, 12))
 
         # generator
         if gt % 444 < 1:

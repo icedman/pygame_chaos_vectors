@@ -289,3 +289,8 @@ class Vector:
         fy = self.y
         fz = self.z
         return Sqr(fx * fx + fy * fy + fz * fz)
+
+    def distanceTo(self, v):
+        vc = Vector.copy(v)
+        vc.subtract(self)
+        return vc.length()

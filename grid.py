@@ -61,7 +61,6 @@ class GridLine:
 
 class Grid:
     grid = []
-    lines = []
 
     SCREENW = 1024
     SCREENH = 768
@@ -73,6 +72,7 @@ class Grid:
     NUMGPOINTSH = 0
 
     def init(self, w=0, h=0):
+        self.grid = []
         if w > 0 and h > 0:
             self.PLAYFIELDW = w
             self.PLAYFIELDH = h

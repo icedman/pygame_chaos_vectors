@@ -67,6 +67,8 @@ class EntityType(Enum):
     particle = 15
     floatingText = 16
     powerUp = 17
+    bomb = 18
+    explosion = 19
     none = 99
 
 
@@ -130,13 +132,14 @@ class Entity:
     def create(self):
         return Entity()
 
-    def kill(self):
+    def kill(self, killer):
         e = self
         if e.points > 0:
+            points = e.points * gameState.multiplier()
             entityService.createFloatingText(
-                e.pos.x, e.pos.y, "+{}".format(e.points), e.color
+                e.pos.x, e.pos.y, "+{}".format(points), e.color
             )
-            gameState.score += e.points
+            gameState.score += points
         entityService.createParticles(e.pos.x, e.pos.y, 8, e.color)
         entityService.destroy(e)
         grid.push(e.pos.x, e.pos.y, 8, 1)
@@ -251,7 +254,7 @@ class Entity:
                     # if dist < 12 + blackhole.size / 2:
                     if dist < rr:
                         self.points = 0
-                        if self.kill():
+                        if self.kill(blackhole):
                             blackhole.grow(1)
                         break
 
@@ -275,6 +278,8 @@ class PinkPinwheel(Entity):
         self.radius = 16
         self.color = "pink"
         self.speed = 2.25
+        self.points = 20
+        self.shape = "pinwheel"
 
     def create(self):
         return PinkPinwheel()
@@ -286,6 +291,7 @@ class BlueDiamond(Entity):
         self.radius = 18
         self.color = "cyan"
         self.speed = 3.25
+        self.points = 50
         self.toward_range = gameState.screen["width"]
 
     def create(self):
@@ -300,14 +306,16 @@ class PurpleSquare(Entity):
         self.speed = 3
         self.toward_range = gameState.screen["width"]
         self.max_count = 120
+        self.points = 100
+        self.shape = "square_diamond"
 
     def create(self):
         return PurpleSquare()
 
-    def kill(self):
+    def kill(self, killer):
         e = self
         if e.radius != 16:
-            Entity.kill(e)
+            Entity.kill(e, killer)
             return
 
         entityService.destroy(e)
@@ -332,6 +340,7 @@ class BlueCircle(Entity):
         self.shape = "hexagon"
         self.speed = 4.35
         self.toward_range = gameState.screen["width"]
+        self.points = 200
 
     def create(self):
         return BlueCircle()
@@ -350,6 +359,7 @@ class RedClone(Entity):
         self.spin_speed = 0
         self.rotate_toward = True
         self.toward_range = gameState.screen["width"]
+        self.points = 2000
 
     def create(self):
         return RedClone()
@@ -384,6 +394,7 @@ class Butterfly(Entity):
         self.speed = 5
         self.direction = Vector(0, 0)
         self.max_count = 60
+        self.points = 300
 
     def create(self):
         return Butterfly()
@@ -394,20 +405,21 @@ class Snake(Entity):
         Entity.init(self)
         self.radius = 16
         self.color = "magenta"
-        # self.shape = "triangle"
+        self.polygon = 5
         self.rotate_toward = True
         self.speed = 3.5
         self.rotation = Rand(0, 360)
         self.spin_speed = 0
         self.shield = 3
         self.max_count = 12
-        # self.angle_offset = 90 + 180
+        self.points = 1000
+        self.angle_offset = 45
 
     def create(self):
         return Snake()
 
-    def kill(self):
-        Entity.kill(self)
+    def kill(self, killer):
+        Entity.kill(self, killer)
         if self.nextNode != None:
             self.nextNode.freeze = 250
             self.nextNode.headNode = None
@@ -461,6 +473,7 @@ class SnakeBody(Entity):
         self.spin_speed = 0
         self.max_count = 120
         self.angle_offset = 90
+        self.points = 500
 
     def create(self):
         return SnakeBody()
@@ -480,14 +493,6 @@ class SnakeBody(Entity):
         dist = distance(h.pos.x, h.pos.y, e.pos.x, e.pos.y)
         mdist = (h.radius + e.radius) * 0.75
 
-        # vh = Vector(e.pos.x - h.pos.x, e.pos.y - h.pos.y)
-        # vh.normalize()
-        # e.speed = h.speed - 0.01
-        # vh.scale(mdist)
-        # e.direction = Vector.identity()
-        # e.pos = Vector.copy(h.pos)
-        # e.pos.add(vh)
-
         dx = e.direction.x
         dy = e.direction.y
         hx = h.pos.x - e.pos.x
@@ -504,7 +509,7 @@ class SnakeBody(Entity):
     def repel(self):
         return
 
-    def kill(self):
+    def kill(self, killer):
         entityService.createParticles(self.pos.x, self.pos.y, 3, self.color)
         return False
 
@@ -518,6 +523,7 @@ class LineEnd(Entity):
         self.speed = 1.0
         self.toward_range = gameState.screen["width"]
         self.max_count = 60
+        self.points = 500
 
     def create(self):
         return LineEnd()
@@ -552,7 +558,7 @@ class LineEnd(Entity):
 
         # kill player with line
 
-    def kill(self):
+    def kill(self, killer):
         e = self
         # unhinge before killing
         if e.headNode != None:
@@ -561,7 +567,7 @@ class LineEnd(Entity):
         if e.nextNode != None:
             e.nextNode.headNode = None
             e.nextNode = None
-        Entity.kill(e)
+        Entity.kill(e, killer)
 
         return True
 
@@ -581,6 +587,7 @@ class Generator(Entity):
         self.generate_what = EntityType.pinkPinwheel
         self.generate_size = 10
         self.generate_rate = 30
+        self.points = 1000
 
     def create(self):
         return Generator()
@@ -601,6 +608,7 @@ class Generator(Entity):
 
 class Shot(Entity):
     bouncy = False
+    superShot = False
 
     def init(self):
         Entity.init(self)
@@ -632,7 +640,7 @@ class Shot(Entity):
     def repel(self):
         return
 
-    def kill(self):
+    def kill(self, killer):
         return False
 
     def update(self, dt):
@@ -643,17 +651,58 @@ class Shot(Entity):
             for n in enemies[k]:
                 dist = distance(n.pos.x, n.pos.y, e.pos.x, e.pos.y)
                 if dist < (n.radius + e.radius):
-                    entityService.destroy(e)
-                    if n.shield > 0:
+                    if self.superShot == False:
+                        entityService.destroy(e)
+                    if n.shield > 0 and self.superShot == False:
                         n.shield -= 1
                     else:
-                        n.kill()
+                        n.kill(self)
                     return
+
+
+class Bomb(Shot):
+    def init(self):
+        Shot.init(self)
+        self.radius = 10
+        self.color = "yellow"
+        self.life = 2000
+        self.max_count = 1
+        self.polygon = 8
+        self.superShot = True
+        self.direction = Vector.identity()
+
+    def create(self):
+        return Bomb()
+
+    def update(self, dt):
+        self.radius += 20
+        self.direction = Vector.identity()
+        Shot.update(self, dt)
+
+
+class Explosion(Entity):
+    def init(self):
+        Entity.init(self)
+        self.radius = 10
+        self.color = "white"
+        self.life = 500
+        self.max_count = 20
+        self.polygon = 8
+        self.spin_speed = 1
+        self.direction = Vector.identity()
+
+    def create(self):
+        return Explosion()
+
+    def update(self, dt):
+        self.radius += 5
+        self.direction = Vector.identity()
+        Entity.update(self, dt)
 
 
 class EnemyShot(Shot):
     def init(self):
-        Entity.init(self)
+        Shot.init(self)
         self.freeze = 0
         self.color = "orange"
         self.radius = 10
@@ -670,7 +719,7 @@ class EnemyShot(Shot):
         dist = distance(n.pos.x, n.pos.y, e.pos.x, e.pos.y)
         if dist < e.radius + n.radius:
             entityService.destroy(self)
-            # print("player hit")
+            n.kill(self)
 
 
 class FloatingText(Entity):
@@ -718,27 +767,35 @@ class EntityService:
         EntityType.particle: None,
         EntityType.floatingText: FloatingText(),
         EntityType.powerUp: None,
+        EntityType.bomb: Bomb(),
+        EntityType.explosion: Explosion(),
     }
 
     def init(self):
         for k in self.defs.keys():
             self.entities[k] = []
-            self.enemies[k] = self.entities[k]
-
-        # not enemies
-        self.enemies[EntityType.player] = []
-        self.enemies[EntityType.shot] = []
-        self.enemies[EntityType.enemyShot] = []
-        self.enemies[EntityType.particle] = []
-        self.enemies[EntityType.powerUp] = []
-        self.enemies[EntityType.floatingText] = []
+            if k in [
+                EntityType.pinkPinwheel,
+                EntityType.blueDiamond,
+                EntityType.greenSquare,
+                EntityType.purpleSquare,
+                EntityType.blueCircle,
+                EntityType.redCircle,
+                EntityType.lineEnd,
+                EntityType.snake,
+                EntityType.snakeBody,
+                EntityType.redClone,
+                EntityType.butterfly,
+                EntityType.generator,
+            ]:
+                self.enemies[k] = self.entities[k]
 
     def create(self, x, y, what, freeze=0):
         e = self.defs[what].create()
         e.init()
         e.pos = Vector(x, y)
         e.type = what
-        e.freeze = freeze
+        e.freeze = freeze * 20
         return e
 
     def attach(self, e):
@@ -780,7 +837,7 @@ class EntityService:
 
         # rotate
         if e.rotate_toward:
-            a = angleTo(0, 0, e.direction.x, e.direction.y) + 360
+            a = angleTo(0, 0, e.direction.x + 0.1, e.direction.y + 0.1) + 360
             e.angle += 360
             e.angle *= 4
             e.angle += a

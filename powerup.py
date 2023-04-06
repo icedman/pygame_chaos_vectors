@@ -21,25 +21,28 @@ class PowerType(Enum):
 
 
 class PowerUp(Entity):
-    powerType = PowerType.speedUp
-
     defs = [
         PowerType.scoreUp,
-        PowerType.scoreUp,
         PowerType.speedUp,
         PowerType.speedUp,
         PowerType.speedUp,
+        PowerType.speedUp,
+        PowerType.shield,
         PowerType.shield,
         PowerType.shield,
         PowerType.lifeUp,
         PowerType.rearCannons,
         PowerType.rearCannons,
+        PowerType.rearCannons,
+        PowerType.moreShots,
+        PowerType.moreShots,
         PowerType.moreShots,
         PowerType.moreShots,
         PowerType.shotSpeedUp,
+        PowerType.shotSpeedUp,
         PowerType.multiplier,
         PowerType.bomb,
-        PowerType.superShots,
+        # PowerType.superShots,
         PowerType.none,
     ]
 
@@ -52,7 +55,6 @@ class PowerUp(Entity):
         self.shield = 0
         self.max_count = 8
         self.life = 12000
-        self.powerType = PowerType(self.defs[Rand(0, len(self.defs) - 1)])
 
     def create(self):
         return PowerUp()
@@ -71,9 +73,12 @@ class PowerUp(Entity):
     def activate(self):
         e = self
         entityService.destroy(e)
+        entityService.attach(
+            entityService.create(e.pos.x, e.pos.y, EntityType.explosion)
+        )
         # animate
 
-        type = self.powerType
+        type = PowerType(self.defs[Rand(0, len(self.defs) - 1)])
         text = ""
 
         if not type in gameState.powers:
@@ -81,31 +86,43 @@ class PowerUp(Entity):
         else:
             gameState.powers[type] += 1
 
-        max = 0
-        if type == PowerType.speedUp:
-            text = "+speed"
-            max = 4
-        elif type == PowerType.shield:
-            text = "+shield"
-            max = 4
-        elif type == PowerType.lifeUp:
-            text = "+ship"
-            gameState.ships += 1
-        elif type == PowerType.rearCannons:
-            text = "rear cannons"
-        elif type == PowerType.moreShots:
-            text = "triple shot"
-        elif type == PowerType.shotSpeedUp:
-            text = "+shot speed"
-            max = 4
-        elif type == PowerType.multiplier:
-            text = "x2"
-        elif type == PowerType.bomb:
-            text = "+bomb"
-        elif type == PowerType.superShots:
-            text = "super shots"
-        else:
-            text = "+20"
+        for t in range(0, 4):
+            max = 0
+            if type == PowerType.speedUp:
+                text = "speed"
+                max = 4
+            elif type == PowerType.shield:
+                text = "shield"
+                gameState.shield += 1
+            elif type == PowerType.rearCannons:
+                text = "rear cannons"
+            elif type == PowerType.moreShots:
+                text = "triple shot"
+            elif type == PowerType.shotSpeedUp:
+                text = "shot speed"
+                max = 4
+            elif type == PowerType.multiplier:
+                text = "multiplier x{}".format(gameState.multiplier())
+                max = 4
+            elif type == PowerType.bomb:
+                text = "bomb"
+                gameState.bombs += 1
+                break
+            elif type == PowerType.lifeUp:
+                text = "ship"
+                gameState.ships += 1
+                break
+            # elif type == PowerType.superShots:
+            #     text = "super shots"
+            else:
+                points = 1000 * gameState.multiplier()
+                gameState.score += points
+                text = "+{}".format(points)
+                break
+
+            if max > 0 and gameState.powers[type] == max:
+                continue
+            break
 
         gameState.powers[type] = (
             max if gameState.powers[type] > max and max > 0 else gameState.powers[type]
@@ -115,6 +132,9 @@ class PowerUp(Entity):
 
 
 def updatePowers(dt):
+    if gameState.gameOver:
+        return
+
     gameState.power_gt += 1
     entities = entityService.entities
 
@@ -134,8 +154,8 @@ def updatePowers(dt):
         gameState.speed_player += gameState.powers[PowerType.speedUp] * 0.5
 
     gameState.speed_shot = 6
-    gameState.fire_rate = 250
+    gameState.fire_rate = 150
     if PowerType.shotSpeedUp in gameState.powers:
         gameState.speed_shot += gameState.powers[PowerType.shotSpeedUp]
-        gameState.fire_rate -= gameState.powers[PowerType.shotSpeedUp] * 50
+        gameState.fire_rate -= gameState.powers[PowerType.shotSpeedUp] * 25
     return

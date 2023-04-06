@@ -5,8 +5,8 @@ class GameState:
     speed_scale = 1
     speed_player = 4
 
+    gameOver = False
     tick = 0
-    cnt = 0
     screen = {"width": 1024, "height": 768}
     keys = {
         "w": False,
@@ -30,6 +30,8 @@ class GameState:
     player = None
     score = 0
     ships = 3
+    bombs = 3
+    shield = 3
 
     powers = {}
 
@@ -37,7 +39,7 @@ class GameState:
         self.speed_scale = 1
         self.speed_player = 1.8
         self.tick = 0
-        self.cnt = 0
+        self.gameOver = False
         self.keys = {
             "w": False,
             "a": False,
@@ -59,7 +61,15 @@ class GameState:
         self.spawn_count = [0, 0, 0, 0]
         self.score = 0
         self.ships = 3
+        self.bombs = 3
+        self.shield = 0
         self.powers = {}
+
+    def multiplier(self):
+        # PowerType.multiplier
+        if 7 in self.powers:
+            return self.powers[7] + 1
+        return 1
 
 
 gameState = GameState()

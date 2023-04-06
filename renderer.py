@@ -11,7 +11,7 @@ def renderShape(ctx: Context, shape: str, x, y, r, angle, color="red"):
     sl = shapes[shape]["shapes"]
     ctx.save()
     ctx.rotate((angle + 360 - 90) % 360)
-    ctx.scale(r, r)
+    ctx.scale(r * 1.5, r * 1.5)
     ctx.translate(x, y)
     for s in sl:
         if "points" in s:
@@ -26,24 +26,34 @@ def renderShape(ctx: Context, shape: str, x, y, r, angle, color="red"):
     ctx.restore()
 
 
+def renderPolygon(ctx: Context, sides, x, y, r, angle, color="red"):
+    ctx.save()
+    ctx.rotate(angle)
+    ctx.scale(r, r)
+    ctx.translate(x, y)
+    ctx.drawPolygon(0, 0, 1, sides, color)
+    ctx.restore()
+
+
 def renderDefault(ctx: Context, e: Entity):
     if e.shape != "":
         renderShape(
             ctx, e.shape, e.pos.x, e.pos.y, e.radius, e.angle + e.angle_offset, e.color
         )
     elif e.polygon > 0:
-        ctx.save()
-        ctx.rotate((e.angle + 360 - 90) % 360)
-        ctx.scale(e.radius, e.radius)
-        ctx.translate(e.pos.x, e.pos.y)
-        ctx.drawPolygon(0, 0, 1, e.polygon, e.color)
-        ctx.restore()
+        renderPolygon(
+            ctx,
+            e.polygon,
+            e.pos.x,
+            e.pos.y,
+            e.radius,
+            ((e.angle + 360 - 90) % 360),
+            e.color,
+        )
     elif e.radius > 0:
-        ctx.save()
-        ctx.rotate(e.angle + e.angle_offset)
-        ctx.translate(e.pos.x, e.pos.y)
-        ctx.drawPolygon(0, 0, e.radius, 4, e.color)
-        ctx.restore()
+        renderPolygon(
+            ctx, 4, e.pos.x, e.pos.y, e.radius, e.angle + e.angle_offset, e.color
+        )
     if e.text != "":
         ctx.saveAttributes()
         ctx.state.strokeWidth = 1
@@ -54,6 +64,21 @@ def renderDefault(ctx: Context, e: Entity):
 def renderPowerup(ctx: Context, e: Entity):
     renderDefault(ctx, e)
     ctx.drawText(e.pos.x + 3, e.pos.y + 8, "?", 1.5, "yellow")
+
+
+def renderBomb(ctx: Context, e: Entity):
+    renderDefault(ctx, e)
+
+
+def renderPlayer(ctx: Context, e: Entity):
+    renderDefault(ctx, e)
+    if gameState.shield > 0:
+        ctx.saveAttributes()
+        t = Floor(gameState.shield if gameState.shield < 4 else 4)
+        ctx.state.strokeWidth = 1 + t
+        clrs = [(80, 80, 80), "red", "cyan", "cyan", "cyan"]
+        renderPolygon(ctx, 7, e.pos.x, e.pos.y, e.radius + 10, e.angle, clrs[t])
+        ctx.restore()
 
 
 def renderBlackhole(ctx: Context, e: Entity):
@@ -134,12 +159,14 @@ class Renderer:
         EntityType.butterfly: renderDefault,
         EntityType.generator: renderDefault,
         EntityType.snakeBody: renderDefault,
-        EntityType.player: renderDefault,
+        EntityType.player: renderPlayer,
         EntityType.shot: renderShot,
         EntityType.enemyShot: renderShot,
         EntityType.particle: renderParticle,
         EntityType.floatingText: renderDefault,
         EntityType.powerUp: renderPowerup,
+        EntityType.bomb: renderBomb,
+        EntityType.explosion: renderBomb,
     }
 
     @staticmethod

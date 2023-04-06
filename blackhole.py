@@ -18,6 +18,7 @@ class RedCircle(Entity):
         self.direction = Vector(0, 0)
         self.shield = 0
         self.max_count = 6
+        self.points = 1000
 
     def create(self):
         return RedCircle()
@@ -63,12 +64,7 @@ class RedCircle(Entity):
         dist = distx * distx + disty * disty
 
         if dist < (12 + sz / 2) * (12 + sz / 2) + 12 * 12:
-            killer = True
-
-            # if (KillPlayer()) {
-            #   // nme5_list.Remove(this);
-            #   Remove();
-            # }
+            n.kill(self)
 
         if self.active and r % 2 == 0:
             pp = Rand(0, 60)
@@ -89,17 +85,19 @@ class RedCircle(Entity):
         self.pos = Vector(x + 0, y + 0)
         self.direction = Vector(dx + 0, dy + 0)
 
-    def kill(self):
+    def kill(self, killer):
         if self.active == False:
             self.active = True
             self.shield = 5
             return False
 
-        self.size *= 0.75
-        if self.size < 0.5:
-            Entity.kill(self)
-            # blowup animation
-            return
+        self.size *= 0.85
+        if self.size < 0.5 or killer.type == EntityType.bomb:
+            Entity.kill(self, killer)
+            entityService.attach(
+                entityService.create(self.pos.x, self.pos.y, EntityType.explosion)
+            )
+            return True
 
         grid.push(self.pos.x, self.pos.y, 6, 1)
         return False
@@ -118,6 +116,10 @@ class RedCircle(Entity):
         self.size = sz
 
         grid.push(self.pos.x, self.pos.y, 6, 1)
+
+        if sz > 50:
+            if self.speed > 0.5:
+                self.speed = 0.5
 
         if sz > 200:
             self.explode()
@@ -164,16 +166,16 @@ def pullParticles(gt):
                 if dist < blackhole.size / 4:
                     ddx = -ddx / dist
                     ddy = -ddy / dist
-                    p.direction.x = p.direction.x + ddx / 2  # .75f
-                    p.direction.y = p.direction.y + ddy / 2  # .75f
+                    p.direction.x = p.direction.x + ddx / 4  # .75f
+                    p.direction.y = p.direction.y + ddy / 4  # .75f
                     p.direction.x = p.direction.x + ddy / spin  # .75' / dist/4
                     p.direction.y = p.direction.y - ddx / spin  # .75' / dist/4
                 else:
                     p.life += 3 * speedScale
                     ddx = ddx / dist
                     ddy = ddy / dist
-                    p.direction.x = p.direction.x + ddx / 2  # .75f
-                    p.direction.y = p.direction.y + ddy / 2  # .75f
+                    p.direction.x = p.direction.x + ddx / 4  # .75f
+                    p.direction.y = p.direction.y + ddy / 4  # .75f
                     p.direction.x = p.direction.x - ddy / spin  # .75' / dist/4
                     p.direction.y = p.direction.y + ddx / spin  # .75' / dist/4
 

@@ -6,13 +6,16 @@ from powerup import PowerType
 
 
 class Player(Entity):
-    last_direction = Vector()
+    last_direction = Vector(0, 1)
 
     mRotateLeft = Matrix.identity().rotate(0, 90, 180 * 3.14 / 180)
     mRotateRight = Matrix.identity().rotate(0, 270, 180 * 3.14 / 180)
     mRotate180 = Matrix.identity().rotate(0, 0, 180 * 3.14 / 180)
     mRotate30 = Matrix.identity().rotate(0, 0, 15 * 3.14 / 180)
     mRotate330 = Matrix.identity().rotate(0, 0, 345 * 3.14 / 180)
+
+    space_gt = 0
+    dead_gt = 0
 
     def init(self):
         Entity.init(self)
@@ -21,6 +24,8 @@ class Player(Entity):
         self.shape = "ship"
         self.rotate_toward = True
         self.direction = Vector()
+        self.space_gt = 0
+        self.dead_gt = 0
 
     def create(self):
         return Player()
@@ -31,8 +36,10 @@ class Player(Entity):
         entityService.attach(shot)
 
     def control(self):
-        speed_player = gameState.speed_player
+        if gameState.tick < 500:
+            return
 
+        speed_player = gameState.speed_player
         shotspeed = gameState.speed_shot
 
         n = self
@@ -45,6 +52,12 @@ class Player(Entity):
             mx * speed_player * gameState.speed_scale,
             my * speed_player * gameState.speed_scale,
         )
+
+        if keys[" "] and gameState.bombs > 0:
+            if len(entityService.entities[EntityType.bomb]) == 0:
+                bomb = entityService.create(self.pos.x, self.pos.y, EntityType.bomb)
+                entityService.attach(bomb)
+                gameState.bombs -= 1
 
         n.direction.scale(2)
         ndir.scale(3)
@@ -93,9 +106,24 @@ class Player(Entity):
         e.color = "white"
         for k in enemies:
             for n in enemies[k]:
+                if n.freeze > 0:
+                    continue
                 dist = distance(n.pos.x, n.pos.y, e.pos.x, e.pos.y)
                 if dist < (n.radius + e.radius):
                     e.color = "red"
-                    n.kill()
-                    # print("player hit")
+                    n.kill(self)
+                    # print("{} {} - {} {}".format(n.pos.x, n.pos.y, self.pos.x, self.pos.y))
+                    if gameState.shield > 0:
+                        gameState.shield -= 0.25
+                    else:
+                        self.kill(n)
+                        explosion = entityService.create(
+                            self.pos.x, self.pos.y, EntityType.explosion
+                        )
+                        explosion.life *= 2
+                        entityService.attach(explosion)
                     return
+
+    def kill(self, killer):
+        self.dead_gt = 100
+        Entity.kill(self, killer)
