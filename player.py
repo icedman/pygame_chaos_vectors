@@ -16,7 +16,6 @@ class Player(Entity):
     mRotate330 = Matrix.identity().rotate(0, 0, 345 * 3.14 / 180)
 
     space_gt = 0
-    dead_gt = 0
 
     last_positions = []
 
@@ -28,7 +27,6 @@ class Player(Entity):
         self.rotate_toward = True
         self.direction = Vector()
         self.space_gt = 0
-        self.dead_gt = 0
         self.last_positions = []
 
     def create(self):
@@ -136,5 +134,6 @@ class Player(Entity):
                     return
 
     def kill(self, killer):
-        self.dead_gt = 100
+        if gameState.dead_gt == 0:
+            gameState.dead_gt = 100
         Entity.kill(self, killer)

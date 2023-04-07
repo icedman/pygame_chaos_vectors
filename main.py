@@ -5,7 +5,7 @@ from state import gameState
 from draw import Context
 from grid import grid
 from entities import entityService
-from renderer import Renderer, renderShape, renderGrid
+from renderer import Renderer, renderGrid
 from sounds import soundService, Effects
 from powerup import PowerType
 
@@ -39,7 +39,7 @@ def game_loop(dt):
     gfx.clear("black")
 
     gfx.save()
-    gfx.drawRect(1, 1, size[0], size[1], "red")
+    gfx.drawRect(1, 1, size[0] - 2, size[1], "red")
     renderGrid(gfx)
 
     entities = entityService.entities
@@ -68,7 +68,7 @@ def menu_loop(dt):
     gfx.clear("black")
 
     gfx.save()
-    gfx.drawRect(1, 1, size[0], size[1], "red")
+    gfx.drawRect(1, 1, size[0] - 2, size[1], "red")
     renderGrid(gfx)
 
     if menu_gt % 60 == 0:
@@ -90,7 +90,7 @@ def menu_loop(dt):
     )
     gfx.drawText(size[0] / 2, size[1] - 120 + 50, "Space to explode bomb", 1, "gray")
 
-    if menu_gt > 50 and pressed[pygame.K_SPACE]:
+    if pressed[pygame.K_SPACE]:
         enter_scene(1)
 
     entities = entityService.entities
@@ -131,6 +131,8 @@ for d in soundService.defs:
 
 enter_scene(0)
 while not done:
+    released = []
+
     tick = pygame.time.get_ticks()
     dt = tick - last_tick
     if dt < 24:
@@ -157,7 +159,6 @@ while not done:
     gameState.keys["down"] = pressed[pygame.K_DOWN]
     gameState.keys["p"] = pressed[pygame.K_p]
 
-    released = []
     for k in gameState.last_pressed:
         if gameState.keys[k] == False:
             released.append(k)

@@ -36,7 +36,7 @@ class Game:
 
         # entityService.attach(entityService.create(100, 100, EntityType.pinkPinwheel))
         # entityService.attach(entityService.create(100, 100, EntityType.greenSquare))
-        entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
+        # entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
         # entityService.attach(entityService.create(100, 100, EntityType.blueDiamond))
         # entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
         # entityService.attach(entityService.create(100, 100, EntityType.snake))
@@ -84,9 +84,9 @@ class Game:
 
         pullParticles(gameState.tick)
 
-        if gameState.player.dead_gt > 0:
-            gameState.player.dead_gt -= 1
-            if gameState.player.dead_gt == 0:
+        if gameState.dead_gt > 0:
+            gameState.dead_gt -= 1
+            if gameState.dead_gt <= 0:
                 self.resetGame()
 
     def randomEnemy(self, gt, plus=0):
@@ -143,7 +143,7 @@ class Game:
             rate = Min(80 + Rand(0, 60) - gt / 1000, 60)
             if gk == EntityType.redClone:  # 'no clone generator
                 gk = EntityType.butterfly  # 'butterfly generator
-            if gk == EntityType.redCircle:  # 'no sun generator
+            while gk == EntityType.redCircle:  # 'no sun generator
                 gk = EntityType(Rand(3, 5))  # 'green, purp, or blue;
             generator = self.spawnEnemy(EntityType.generator, 20, Rand(0, 12))
             generator.generate_rate = rate
@@ -158,6 +158,9 @@ class Game:
             [(gt % 2900 == 0), 5, 0, 2, 20, 40, 750, 3, 300, 5, 3 * 8, 24, 3, 1],
             [gt4k, 0, 11, 2, 20, 40, 750, 3, 300, 5, 3 * 8, 24, 3],
         ]
+
+        if gameState.speed_enemy < 2 and gt % 888 == 0:
+            gameState.speed_enemy += 0.1
 
         idx = 0
         for ss in sp:

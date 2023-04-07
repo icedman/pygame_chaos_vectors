@@ -119,7 +119,6 @@ class Entity:
         n.direction.x = Cos(dir) * mag
         n.direction.y = Sin(dir) * mag
         n.spin_speed = Rnd(1, 4)
-        n.speed = self.speed * gameState.speed_enemy
 
     def update(self, dt):
         # print('update')
@@ -627,6 +626,7 @@ class Shot(Entity):
         self.color = "yellow"
         self.speed = gameState.speed_shot
         self.direction = Vector.identity()
+        self.max_count = 0
 
     def create(self):
         return Shot()
@@ -814,6 +814,10 @@ class EntityService:
         base = self.defs[e.type]
         if base.max_count > 0 and len(self.entities[e.type]) >= base.max_count:
             return None
+
+        if e.type in self.enemies:
+            e.speed *= gameState.speed_enemy
+
         self.entities[e.type].append(e)
         return e
 

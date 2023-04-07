@@ -55,7 +55,7 @@ class PowerUp(Entity):
         self.speed = 2.5
         self.shield = 0
         self.max_count = 8
-        self.life = 12000
+        self.life = 20000
         self.spawn_effect = Effects.spawn5
 
     def create(self):
@@ -88,10 +88,6 @@ class PowerUp(Entity):
             gameState.powers[type] = 1
         else:
             gameState.powers[type] += 1
-
-        gameState.multipler = 1
-        if PowerType.multiplier in gameState.powers:
-            gameState.multipler += gameState.powers[PowerType.multiplier]
 
         for t in range(0, 4):
             max = 0
@@ -150,6 +146,10 @@ def updatePowers(dt):
 
     gameState.power_gt += 1
     entities = entityService.entities
+
+    gameState.multipler = 1
+    if PowerType.multiplier in gameState.powers:
+        gameState.multipler += gameState.powers[PowerType.multiplier]
 
     spawnEvery = 600
     if len(entities[EntityType.powerUp]) == 0:

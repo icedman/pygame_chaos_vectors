@@ -7,25 +7,6 @@ from shapes import shapes
 from grid import grid
 
 
-def renderShape(ctx: Context, shape: str, x, y, r, angle, color="red"):
-    sl = shapes[shape]["shapes"]
-    ctx.save()
-    ctx.rotate((angle + 360 - 90) % 360)
-    ctx.scale(r * 1.5, r * 1.5)
-    ctx.translate(x, y)
-    for s in sl:
-        if "points" in s:
-            points = []
-            for p in s["points"]:
-                points.append(p)
-            ctx.translate(points[0][0] * r, points[0][1] * r)
-            del points[0]
-            ctx.drawPolygonPoints(points, color)
-        if "polygon" in s:
-            ctx.drawPolygon(0, 0, s["scale"], s["polygon"], color)
-    ctx.restore()
-
-
 def renderPolygon(ctx: Context, sides, x, y, r, angle, color="red"):
     ctx.save()
     ctx.rotate(angle)
@@ -37,9 +18,8 @@ def renderPolygon(ctx: Context, sides, x, y, r, angle, color="red"):
 
 def renderDefault(ctx: Context, e: Entity):
     if e.shape != "":
-        renderShape(
-            ctx, e.shape, e.pos.x, e.pos.y, e.radius, e.angle + e.angle_offset, e.color
-        )
+        sl = shapes[e.shape]["shapes"]
+        ctx.drawShape(sl, e.pos.x, e.pos.y, e.radius, e.angle + e.angle_offset, e.color)
     elif e.polygon > 0:
         renderPolygon(
             ctx,

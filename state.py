@@ -30,6 +30,7 @@ class GameState:
     last_gt = 0
     spawn_gt = 0
     power_gt = 0
+    dead_gt = 0
 
     player = None
     score = 0
@@ -65,6 +66,7 @@ class GameState:
         self.last_gt = 0
         self.spawn_gt = 0
         self.power_gt = 0
+        self.dead_gt = 0
         self.player = None
         self.spawn_count = [0, 0, 0, 0]
         self.score = 0

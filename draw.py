@@ -83,35 +83,28 @@ class Context:
                 color = [255, 255, 255]
 
         w = self.state.strokeWidth
-        if w > 3:
-            w = 3
-        # pygame.gfxdraw.line(
-        #     self.surface, Floor(v1.x), Floor(v1.y), Floor(v2.x), Floor(v2.y), color
-        # )
-
-        d = Vector.copy(v2).subtract(v1).normalize()
-        sideDir = Vector(0, 0, 1).cross(d)
-        # v3 = Vector.copy(v1).add(sideDir)
-        # v4 = Vector.copy(v2).add(sideDir)
-        v1.subtract(sideDir)
-        v2.subtract(sideDir)
-        for i in range(0, w):
+        if w == 1:
             pygame.gfxdraw.line(
                 self.surface, Floor(v1.x), Floor(v1.y), Floor(v2.x), Floor(v2.y), color
             )
-            v1.add(sideDir)
-            v2.add(sideDir)
 
-        # pygame.gfxdraw.filled_polygon(
-        #     self.surface,
-        #     [
-        #         [(v1.x), (v1.y)],
-        #         [(v3.x), (v3.y)],
-        #         [(v4.x), (v4.y)],
-        #         [(v2.x), (v2.y)],
-        #     ],
-        #     color,
-        # )
+        d = Vector.copy(v2).subtract(v1).normalize()
+        sideDir = Vector(0, 0, 1).cross(d).scale(w * 0.48)
+        v3 = Vector.copy(v1).add(sideDir)
+        v4 = Vector.copy(v2).add(sideDir)
+        v1.subtract(sideDir)
+        v2.subtract(sideDir)
+
+        pygame.gfxdraw.filled_polygon(
+            self.surface,
+            [
+                [(v1.x), (v1.y)],
+                [(v3.x), (v3.y)],
+                [(v4.x), (v4.y)],
+                [(v2.x), (v2.y)],
+            ],
+            color,
+        )
 
     def drawLine(self, x, y, x2, y2, color=None):
         if color == None:
@@ -237,22 +230,21 @@ class Context:
             adv = self.drawChar(x, y + (-size * 0.5), c, size, color, False)
             x += adv
 
-
-def renderShape(ctx: Context, shapes, x, y, r, angle, color="red"):
-    sl = shapes
-    ctx.save()
-    ctx.rotate((angle + 360 - 90) % 360)
-    ctx.scale(r * 1.5, r * 1.5)
-    ctx.translate(x, y)
-    for shape in sl:
-        s = shape["shape"]
-        if "points" in s:
-            points = []
-            for p in s["points"]:
-                points.append(p)
-            ctx.translate(points[0][0] * r, points[0][1] * r)
-            del points[0]
-            ctx.drawPolygonPoints(points, color)
-        if "polygon" in s:
-            ctx.drawPolygon(0, 0, s["scale"], s["polygon"], color)
-    ctx.restore()
+    def drawShape(self, shapes, x, y, r, angle, color="red"):
+        sl = shapes
+        m = Matrix.identity()
+        m.rotate(0, 0, ((angle + 360 - 90) % 360) * 3.14 / 180)
+        m.multiply(Matrix.identity().scale(r * 1.5, r * 1.5, 1))
+        m.multiply(Matrix.identity().translate(x, y, 0))
+        for shape in sl:
+            s = shape
+            if "points" in s:
+                points = []
+                for p in s["points"]:
+                    tp = Vector(p[0], p[1]).transform(m)
+                    points.append([tp.x, tp.y])
+                # self.translate(points[0][0] * r, points[0][1] * r)
+                del points[0]
+                self.drawPolygonPoints(points, color)
+            if "polygon" in s:
+                self.drawPolygon(0, 0, s["scale"], s["polygon"], color)
