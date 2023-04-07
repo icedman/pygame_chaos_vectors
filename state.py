@@ -19,7 +19,7 @@ class GameState:
         "up": False,
         "down": False,
         "p": False,
-        " ": False
+        " ": False,
     }
     last_pressed = []
 
@@ -55,7 +55,7 @@ class GameState:
             "up": False,
             "down": False,
             "p": False,
-            " ": False
+            " ": False,
         }
         self.last_pressed = []
         self.speed_enemy = 0.75

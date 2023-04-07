@@ -10,8 +10,11 @@ def Rand(s, e):
     return random.randint(s, e)
 
 
-def Rnd(s, e):
-    r = random.random() * (e - s)
+def Rnd(s=0, e=0):
+    l = e - s
+    if l == 0:
+        l = 1
+    r = random.random() * l
     return s + r
 
 
@@ -217,6 +220,12 @@ class Vector:
         return v
 
     @staticmethod
+    def right():
+        v = Vector()
+        v.M = [1, 0, 0]
+        return v
+
+    @staticmethod
     def copy(m):
         v = Vector.identity()
         for i in range(0, 3):
@@ -248,6 +257,8 @@ class Vector:
         self.M[2] = z * 1
 
     def transform(self, m: Matrix):
+        self.x += 0.001
+        self.y += 0.001
         r = Vector.identity()
         for col in range(0, 3):
             sum = 0
@@ -288,13 +299,35 @@ class Vector:
         self.z = self.z / l
         return self
 
+    def dot(self, vb):
+        return (vb.x * self.x) + (vb.y * self.y) + (vb.z * self.z)
+
+    def cross(self, vb):
+        vr = Vector.identity()
+        vr.x = (self.y * vb.z) - (self.z * vb.y)
+        vr.y = (self.z * vb.x) - (self.x * vb.z)
+        vr.z = (self.x * vb.y) - (self.y * vb.x)
+        return vr
+
     def length(self):
         fx = self.x
         fy = self.y
         fz = self.z
         return Sqr(fx * fx + fy * fy + fz * fz)
 
+    def angleTo(self, v):
+        return angleTo(self.x, self.y, v.x, v.y)
+
+    def angleTo360(self, t):
+        f = self
+        right = Vector.right()
+        angle = f.angleTo(t)
+        return 360 - angle if (right.angleTo(to)) > 90 else angle
+
     def distanceTo(self, v):
         vc = Vector.copy(v)
         vc.subtract(self)
         return vc.length()
+
+    def __str__(self):
+        return "({},{})".format(self.x, self.y)

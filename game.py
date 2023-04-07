@@ -36,7 +36,7 @@ class Game:
 
         # entityService.attach(entityService.create(100, 100, EntityType.pinkPinwheel))
         # entityService.attach(entityService.create(100, 100, EntityType.greenSquare))
-        # entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
+        entityService.attach(entityService.create(100, 100, EntityType.blueCircle))
         # entityService.attach(entityService.create(100, 100, EntityType.blueDiamond))
         # entityService.attach(entityService.create(100, 100, EntityType.purpleSquare))
         # entityService.attach(entityService.create(100, 100, EntityType.snake))

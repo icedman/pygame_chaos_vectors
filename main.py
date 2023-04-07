@@ -10,8 +10,8 @@ from sounds import soundService, Effects
 from powerup import PowerType
 
 pygame.init()
-size = [1600, 900]
-# size = [1280, 800]
+# size = [1600, 900]
+size = [1280, 800]
 screen = pygame.display.set_mode(size)
 done = False
 gfx = Context(screen)
