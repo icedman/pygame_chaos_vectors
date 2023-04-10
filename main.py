@@ -8,6 +8,7 @@ from entities import entityService
 from renderer import Renderer, renderGrid
 from sounds import soundService, Effects
 from powerup import PowerType
+from colors import tint, untint
 
 pygame.init()
 # size = [1600, 900]
@@ -30,6 +31,14 @@ def enter_scene(scn):
         game.clear()
     elif gameState.scene == 1:
         game.newGame()
+
+
+def toggleTint():
+    gameState.tinted = not gameState.tinted
+    if gameState.tinted:
+        tint(0, 255, 0, 0.6)
+    else:
+        untint()
 
 
 def game_loop(dt):
@@ -152,6 +161,7 @@ while not done:
     gameState.keys["a"] = pressed[pygame.K_a]
     gameState.keys["s"] = pressed[pygame.K_s]
     gameState.keys["d"] = pressed[pygame.K_d]
+    gameState.keys["t"] = pressed[pygame.K_t]
     gameState.keys[" "] = pressed[pygame.K_SPACE]
     gameState.keys["left"] = pressed[pygame.K_LEFT]
     gameState.keys["right"] = pressed[pygame.K_RIGHT]
@@ -170,6 +180,8 @@ while not done:
 
     if "p" in released:
         paused = not paused
+    if "t" in released:
+        toggleTint()
 
     if gameState.scene == 0:
         menu_loop(dt)

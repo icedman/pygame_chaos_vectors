@@ -89,7 +89,7 @@ class Matrix:
     @staticmethod
     def fromAngle(angle):
         angle = Floor(angle)
-        angle += 640
+        angle += 360 * 2
         angle = angle % 360
         if angle in _matrixRotationCache:
             return Matrix.copy(_matrixRotationCache[angle])
@@ -246,7 +246,7 @@ class Vector:
 
     @staticmethod
     def fromAngle(angle):
-        angle += 640
+        angle += 360 * 2
         angle = angle % 360
         if angle in _vectorRotationCache:
             return Vector.copy(_vectorRotationCache[angle])
@@ -346,14 +346,20 @@ class Vector:
         fz = self.z
         return Sqr(fx * fx + fy * fy + fz * fz)
 
+    def angle(self):
+        return Vector(0, 0).angleTo(self)
+
+    # def angle360(self):
+    #     return Vector(0, 0).angleTo360(self)
+
     def angleTo(self, v):
         return angleTo(self.x, self.y, v.x, v.y)
 
-    def angleTo360(self, t):
-        f = self
-        right = Vector.right()
-        angle = f.angleTo(t)
-        return 360 - angle if (right.angleTo(to)) > 90 else angle
+    # def angleTo360(self, t):
+    #     f = self
+    #     right = Vector.right()
+    #     angle = f.angleTo(t)
+    #     return 360 - angle if (right.angleTo(t)) > 90 else angle
 
     def distanceTo(self, v):
         vc = Vector.copy(v)

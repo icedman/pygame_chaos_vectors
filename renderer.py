@@ -19,7 +19,9 @@ def renderPolygon(ctx: Context, sides, x, y, r, angle, color="red"):
 def renderDefault(ctx: Context, e: Entity):
     if e.shape != "":
         sl = shapes[e.shape]["shapes"]
-        ctx.drawShape(sl, e.pos.x, e.pos.y, e.radius, e.angle + e.angle_offset, e.color)
+        ctx.drawShape(
+            sl, e.pos.x, e.pos.y, e.radius, e.angle + e.angle_offset - 90, e.color
+        )
     elif e.polygon > 0:
         renderPolygon(
             ctx,
@@ -62,6 +64,7 @@ def renderPlayer(ctx: Context, e: Entity):
         ctx.restore()
 
     renderDefault(ctx, e)
+
     if gameState.shield > 0:
         ctx.saveAttributes()
         t = Floor(gameState.shield if gameState.shield < 4 else 4)

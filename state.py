@@ -19,9 +19,11 @@ class GameState:
         "up": False,
         "down": False,
         "p": False,
+        "t": False,
         " ": False,
     }
     last_pressed = []
+    tinted = False
 
     speed_enemy = 0.75
     speed_shot = 8
@@ -56,6 +58,7 @@ class GameState:
             "up": False,
             "down": False,
             "p": False,
+            "t": False,
             " ": False,
         }
         self.last_pressed = []
