@@ -29,8 +29,8 @@ def randomCorner(c):
         corner = Rand(1, 4) if (corner == 5) else RndOr(p[0], p[1])
 
     if corner < 5:
-        pw = gameState.screen["width"]
-        ph = gameState.screen["height"]
+        pw = gameState.screenWidth
+        ph = gameState.screenHeight
         cp = [
             [30, pw - 30, 30, ph - 30],
             [30, 80, 30, 80],
@@ -171,7 +171,7 @@ class Entity:
             dx = Abs(dx)
             x = x + dx
             e.wall = True
-        elif x > gameState.screen["width"] - 12:
+        elif x > gameState.screenWidth - 12:
             dx = -Abs(dx)
             x = x + dx
             e.wall = True
@@ -180,7 +180,7 @@ class Entity:
             dy = Abs(dy)
             y = y + dy
             e.wall = True
-        elif y > gameState.screen["height"] - 12:
+        elif y > gameState.screenHeight - 12:
             dy = -Abs(dy)
             y = y + dy
             e.wall = True
@@ -268,7 +268,7 @@ class GreenSquare(Entity):
         self.color = "green"
         self.speed = 3.1
         self.dodge = True
-        self.toward_range = gameState.screen["width"]
+        self.toward_range = gameState.screenWidth
 
     def create(self):
         return GreenSquare()
@@ -295,7 +295,7 @@ class BlueDiamond(Entity):
         self.color = "cyan"
         self.speed = 3.25
         self.points = 50
-        self.toward_range = gameState.screen["width"]
+        self.toward_range = gameState.screenWidth
         self.spawn_effect = Effects.spawn3
 
     def create(self):
@@ -308,7 +308,7 @@ class PurpleSquare(Entity):
         self.radius = 16
         self.color = "purple"
         self.speed = 3
-        self.toward_range = gameState.screen["width"]
+        self.toward_range = gameState.screenWidth
         self.max_count = 120
         self.points = 100
         self.shape = "square_diamond"
@@ -344,7 +344,7 @@ class BlueCircle(Entity):
         self.color = "blue"
         self.shape = "hexagon"
         self.speed = 4.35
-        self.toward_range = gameState.screen["width"]
+        self.toward_range = gameState.screenWidth
         self.points = 200
 
     def create(self):
@@ -363,7 +363,7 @@ class RedClone(Entity):
         self.shield = 5
         self.spin_speed = 0
         self.rotate_toward = True
-        self.toward_range = gameState.screen["width"]
+        self.toward_range = gameState.screenWidth
         self.points = 2000
         self.spawn_effect = Effects.spawn1
 
@@ -529,7 +529,7 @@ class LineEnd(Entity):
         self.color = "blue"
         self.shape = "triangle"
         self.speed = 1.0
-        self.toward_range = gameState.screen["width"]
+        self.toward_range = gameState.screenWidth
         self.max_count = 60
         self.points = 500
         self.spawn_effect = Effects.spawn3
@@ -641,9 +641,9 @@ class Shot(Entity):
         y = e.pos.y
         if (
             (x < 12)
-            or (x > gameState.screen["width"] - 12)
+            or (x > gameState.screenWidth - 12)
             or (y < 12)
-            or (y > gameState.screen["height"] - 12)
+            or (y > gameState.screenHeight - 12)
         ):
             entityService.createParticles(x, y, Rand(1, 3), e.color)
             entityService.destroy(e)

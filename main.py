@@ -1,4 +1,6 @@
 import pygame
+import sys
+
 from maths import *
 from game import Game
 from state import gameState
@@ -9,28 +11,27 @@ from renderer import Renderer, renderGrid
 from sounds import soundService, Effects
 from powerup import PowerType
 from colors import tint, untint
+from scene import *
+from demo import *
 
 pygame.init()
 # size = [1600, 900]
 size = [1280, 800]
 screen = pygame.display.set_mode(size)
-done = False
 gfx = Context(screen)
 
 game = Game()
 game.setup(size)
 
-paused = False
 menu_gt = 0
 last_tick = 0
 
-
-def enter_scene(scn):
-    gameState.scene = scn
-    if gameState.scene == 0:
-        game.clear()
-    elif gameState.scene == 1:
-        game.newGame()
+# def enter_scene(scn):
+#     gameState.scene = scn
+#     if gameState.scene == 0:
+#         game.clear()
+#     elif gameState.scene == 1:
+#         game.newGame()
 
 
 def toggleTint():
@@ -41,10 +42,15 @@ def toggleTint():
         untint()
 
 
-def game_loop(dt):
-    if paused == False:
+def game_update(dt):
+    if gameState.paused == False:
         game.update(dt)
 
+    if gameState.released["escape"]:
+        sceneService.enterScene(SceneType.menu)
+
+
+def game_render(gfx):
     gfx.clear("black")
 
     gfx.save()
@@ -67,26 +73,24 @@ def game_loop(dt):
 
     if gameState.gameOver:
         gfx.drawText(size[0] / 2, size[1] / 2, "Game Over", 2, "red")
-        if pressed[pygame.K_SPACE]:
-            enter_scene(0)
-
-    pygame.display.flip()
+        if gameState.released[" "]:
+            sceneService.enterScene(SceneType.menu)
 
 
-def menu_loop(dt):
-    gfx.clear("black")
-
-    gfx.save()
-    gfx.drawRect(1, 1, size[0] - 2, size[1], "red")
-    renderGrid(gfx)
-
+def menu_update(dt):
     if menu_gt % 60 == 0:
         if RndOr(0, 1) == 0:
             grid.push(Rand(0, size[0]), Rand(0, size[1]), 6, 1 + Rand(0, 2))
         else:
             grid.pull(Rand(0, size[0]), Rand(0, size[1]), 8, 6 + Rand(0, 4))
-
     grid.update(dt)
+
+
+def menu_render(gfx):
+    gfx.clear("black")
+    gfx.save()
+    gfx.drawRect(1, 1, size[0] - 2, size[1], "red")
+    renderGrid(gfx)
 
     gfx.saveAttributes()
     gfx.state.strokeWidth = 4
@@ -99,8 +103,8 @@ def menu_loop(dt):
     )
     gfx.drawText(size[0] / 2, size[1] - 120 + 50, "Space to explode bomb", 1, "gray")
 
-    if pressed[pygame.K_SPACE]:
-        enter_scene(1)
+    if gameState.released[" "]:
+        sceneService.enterScene(SceneType.game)
 
     entities = entityService.entities
     for k in entities.keys():
@@ -108,8 +112,6 @@ def menu_loop(dt):
         for e in ek:
             entityService.update(e, dt)
             Renderer.renderEntity(gfx, e)
-
-    pygame.display.flip()
 
 
 # setup sounds
@@ -138,8 +140,74 @@ soundService.defs[Effects.explosion] = pygame.mixer.Sound("./sounds/draven/bomb.
 for d in soundService.defs:
     soundService.defs[d].set_volume(0.25)
 
-enter_scene(0)
-while not done:
+gameState.trackedKeys = {
+    pygame.K_UP: "up",
+    pygame.K_DOWN: "down",
+    pygame.K_LEFT: "left",
+    pygame.K_RIGHT: "right",
+    pygame.K_ESCAPE: "escape",
+    pygame.K_SPACE: " ",
+    pygame.K_w: "w",
+    pygame.K_a: "a",
+    pygame.K_s: "s",
+    pygame.K_d: "d",
+    pygame.K_p: "p",  # pause
+    pygame.K_t: "t",  # toggle sound
+    pygame.K_o: "o",  # demo
+    pygame.K_l: "l",  # basicDraw
+}
+gameState.init()
+gameState.screenWidth = size[0]
+gameState.screenHeight = size[1]
+
+
+class GameScene:
+    type = SceneType.menu
+
+    def onEnter(self):
+        game.newGame()
+        pass
+
+    def onExit(self):
+        pass
+
+    def onUpdate(self, dt):
+        game_update(dt)
+
+    def onRender(self, gfx):
+        game_render(gfx)
+
+
+class MenuScene:
+    type = SceneType.menu
+
+    def onEnter(self):
+        game.clear()
+        menu_gt = 0
+
+    def onExit(self):
+        pass
+
+    def onUpdate(self, dt):
+        menu_update(dt)
+
+        if gameState.released["escape"]:
+            gameState.done = True
+
+    def onRender(self, gfx):
+        menu_render(gfx)
+
+
+sceneService.defs[SceneType.menu] = MenuScene()
+sceneService.defs[SceneType.game] = GameScene()
+sceneService.defs[SceneType.demo] = DemoScene()
+sceneService.enterScene(SceneType.menu)
+
+for arg in sys.argv:
+    if arg.startswith("-"):
+        gameState.pressed[arg[1:]] = True
+
+while not gameState.done:
     released = []
 
     tick = pygame.time.get_ticks()
@@ -151,43 +219,26 @@ while not done:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            done = True
+            gameState.done = True
 
     pressed = pygame.key.get_pressed()
-    if pressed[pygame.K_ESCAPE]:
-        break
+    for k in gameState.trackedKeys:
+        hk = gameState.trackedKeys[k]
+        gameState.released[hk] = gameState.pressed[hk] == True and pressed[k] == False
+        gameState.pressed[hk] = pressed[k]
 
-    gameState.keys["w"] = pressed[pygame.K_w]
-    gameState.keys["a"] = pressed[pygame.K_a]
-    gameState.keys["s"] = pressed[pygame.K_s]
-    gameState.keys["d"] = pressed[pygame.K_d]
-    gameState.keys["t"] = pressed[pygame.K_t]
-    gameState.keys[" "] = pressed[pygame.K_SPACE]
-    gameState.keys["left"] = pressed[pygame.K_LEFT]
-    gameState.keys["right"] = pressed[pygame.K_RIGHT]
-    gameState.keys["up"] = pressed[pygame.K_UP]
-    gameState.keys["down"] = pressed[pygame.K_DOWN]
-    gameState.keys["p"] = pressed[pygame.K_p]
-
-    for k in gameState.last_pressed:
-        if gameState.keys[k] == False:
-            released.append(k)
-
-    gameState.last_pressed = []
-    for k in gameState.keys:
-        if gameState.keys[k]:
-            gameState.last_pressed.append(k)
-
-    if "p" in released:
-        paused = not paused
-    if "t" in released:
+    if gameState.released["p"]:
+        gameState.paused = not gameState.paused
+    if gameState.released["t"]:
         toggleTint()
+    if gameState.released["o"]:
+        sceneService.enterScene(SceneType.demo)
+    if gameState.released["l"]:
+        gfx.basicDraw = not gfx.basicDraw
 
-    if gameState.scene == 0:
-        menu_loop(dt)
-    elif gameState.scene == 1:
-        game_loop(dt)
-        menu_gt = 0
+    sceneService.current.onUpdate(dt)
+    sceneService.current.onRender(gfx)
+    pygame.display.flip()
 
     for r in soundService.requests:
         cnt = soundService.requests[r]

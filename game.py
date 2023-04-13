@@ -22,8 +22,8 @@ class Game:
 
     def setup(self, size):
         self.size = size
-        gameState.screen["width"] = size[0]
-        gameState.screen["height"] = size[1]
+        gameState.screenWidth = size[0]
+        gameState.screenHeight = size[1]
         self.newGame()
 
     def newGame(self, retainState=False):
@@ -65,8 +65,8 @@ class Game:
             entityService.entities[EntityType.powerUp] = []
 
     def centerPlayer(self):
-        gameState.player.pos.x = gameState.screen["width"] / 2
-        gameState.player.pos.y = gameState.screen["height"] / 2
+        gameState.player.pos.x = gameState.screenWidth / 2
+        gameState.player.pos.y = gameState.screenHeight / 2
 
     def update(self, dt):
         gameState.tick += dt

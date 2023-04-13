@@ -1,5 +1,6 @@
 class GameState:
-    scene = 0
+    done = False
+    paused = False
     spawn_count = [0, 0, 0, 0]
     starting_difficulty = 0
 
@@ -8,21 +9,11 @@ class GameState:
 
     gameOver = False
     tick = 0
-    screen = {"width": 1024, "height": 768}
-    keys = {
-        "w": False,
-        "a": False,
-        "s": False,
-        "d": False,
-        "left": False,
-        "right": False,
-        "up": False,
-        "down": False,
-        "p": False,
-        "t": False,
-        " ": False,
-    }
-    last_pressed = []
+    screenWidth = 800
+    screenHeight = 600
+    trackedKeys = {}
+    pressed = {}
+    released = {}
     tinted = False
 
     speed_enemy = 0.75
@@ -48,20 +39,6 @@ class GameState:
         self.speed_player = 1.8
         self.tick = 0
         self.gameOver = False
-        self.keys = {
-            "w": False,
-            "a": False,
-            "s": False,
-            "d": False,
-            "left": False,
-            "right": False,
-            "up": False,
-            "down": False,
-            "p": False,
-            "t": False,
-            " ": False,
-        }
-        self.last_pressed = []
         self.speed_enemy = 0.75
         self.speed_shot = 4
         self.speed_particle = 3
@@ -78,6 +55,10 @@ class GameState:
         self.shield = 3
         self.powers = {}
         self.multipler = 1
+
+        for k in self.trackedKeys:
+            self.pressed[self.trackedKeys[k]] = False
+            self.released[self.trackedKeys[k]] = False
 
 
 gameState = GameState()

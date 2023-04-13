@@ -45,7 +45,7 @@ class Player(Entity):
         shotspeed = gameState.speed_shot
 
         n = self
-        keys = gameState.keys
+        keys = gameState.pressed
         mx = -1 if (keys["a"] == True) else 0
         mx += 1 if (keys["d"] == True) else 0
         my = 1 if (keys["s"] == True) else 0
