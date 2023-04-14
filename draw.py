@@ -256,4 +256,4 @@ class Context:
                 clr = color if not "color" in s else s["color"]
                 self.drawPolygonPoints(points, clr)
             if "polygon" in s:
-                self.drawPolygon(0, 0, r * s["scale"], s["polygon"], color)
+                self.drawPolygon(x, y, r * 1.5 * s["scale"], s["polygon"], color)

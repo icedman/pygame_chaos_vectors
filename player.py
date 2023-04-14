@@ -27,6 +27,7 @@ class Player(Entity):
         self.rotate_toward = True
         self.direction = Vector()
         self.space_gt = 0
+        self.points = 0
         self.last_positions = []
 
     def create(self):

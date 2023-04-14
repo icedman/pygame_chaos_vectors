@@ -666,6 +666,9 @@ class Shot(Entity):
                         entityService.destroy(e)
                     if n.shield > 0 and self.superShot == False:
                         n.shield -= 1
+                        entityService.createParticles(
+                            e.pos.x, e.pos.y, Rand(1, 3), e.color
+                        )
                     else:
                         n.kill(self)
                     return
@@ -731,7 +734,11 @@ class EnemyShot(Shot):
         dist = distance(n.pos.x, n.pos.y, e.pos.x, e.pos.y)
         if dist < e.radius + n.radius:
             entityService.destroy(self)
-            n.kill(self)
+            if n.shield > 0:
+                n.shield -= 1
+                entityService.createParticles(e.pos.x, e.pos.y, Rand(1, 3), e.color)
+            else:
+                n.kill(self)
 
 
 class FloatingText(Entity):
